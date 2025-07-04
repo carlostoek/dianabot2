@@ -233,3 +233,10 @@ class LucienVoice:
             f"{self.EMOJIS['lucien']} *Historias de Diana*\n"
             "Explora capítulos para descubrir secretos."
         )
+
+    def game_introduction(self) -> str:
+        """Introducción para la sección de juegos"""
+        return (
+            f"{self.EMOJIS['lucien']} *Sala de Juegos*\n"
+            "Pon a prueba tu suerte y conocimiento."
+        )
