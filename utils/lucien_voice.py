@@ -200,3 +200,36 @@ class MissionService:
             "completed_today": completed_today,
             "total_completed_today": len(completed_today)
         }
+
+
+class LucienVoice:
+    """Mensajes narrativos con la voz de Lucien"""
+
+    EMOJIS = {
+        "lucien": "🎩",
+        "besitos": "💋",
+        "star": "⭐",
+        "completed": "✅",
+        "pending": "⏳",
+    }
+
+    def mission_introduction(self) -> str:
+        return (
+            f"{self.EMOJIS['lucien']} *Misiones de la Mansión*\n\n"
+            "Aquí puedes ganar besitos completando tareas."
+        )
+
+    def daily_header(self) -> str:
+        return f"{self.EMOJIS['lucien']} *Misiones Diarias*"
+
+    def mission_completed(self, name: str, reward: int) -> str:
+        return (
+            f"{self.EMOJIS['lucien']} ¡Misión completada!* {name}*\n"
+            f"Recompensa: {reward} {self.EMOJIS['besitos']}"
+        )
+
+    def story_introduction(self) -> str:
+        return (
+            f"{self.EMOJIS['lucien']} *Historias de Diana*\n"
+            "Explora capítulos para descubrir secretos."
+        )
