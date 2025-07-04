@@ -1,16 +1,16 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, BigInteger
 from sqlalchemy.orm import relationship
 from .base import BaseModel
 
 class User(BaseModel):
     __tablename__ = 'users'
     
-    telegram_id = Column(Integer, unique=True, index=True, nullable=False)
+    telegram_id = Column(BigInteger, unique=True, index=True, nullable=False)
     username = Column(String(255))
     first_name = Column(String(255))
     level = Column(Integer, default=1)
     besitos = Column(Integer, default=100)
-    total_besitos_earned = Column(Integer, default=100)
+    total_besitos_earned = Column(BigInteger, default=100)
     current_story = Column(String(100), default="welcome")
     is_active = Column(Boolean, default=True)
     daily_streak = Column(Integer, default=0)
