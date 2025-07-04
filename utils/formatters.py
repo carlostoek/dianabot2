@@ -81,13 +81,4 @@ class MessageFormatter:
             f"por Lady Diana. Estará disponible muy pronto.\n\n"
             f"*Gracias por su paciencia.*"
         )
-    
-    @staticmethod
-    def besitos_transaction(user, amount, transaction_type="added"):
-        """Formatea mensaje de transacción de besitos"""
-        action = "ganado" if transaction_type == "added" else "gastado"
-        emoji = "💰" if transaction_type == "added" else "💸"
         
-        return (
-            f"{emoji} **Transacción completada**\n\n"
-            f"Has {action} **{amount} besitos
