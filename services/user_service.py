@@ -52,6 +52,15 @@ class UserService:
             return None
     
     @staticmethod
+    def get_user_by_id(db: Session, user_id: int):
+        """Obtiene un usuario por su ID interno"""
+        try:
+            return db.query(User).filter(User.id == user_id).first()
+        except Exception as e:
+            logger.error(f"Error al obtener usuario por ID {user_id}: {e}")
+            return None
+    
+    @staticmethod
     def add_besitos(db: Session, user: User, amount: int, track_total: bool = True):
         """Añade besitos a un usuario"""
         try:
@@ -88,4 +97,48 @@ class UserService:
             db.commit()
             db.refresh(user)
             
-            logger.info(f"
+            logger.info(f"Restados {amount} besitos al usuario {user.telegram_id}")
+            return user
+            
+        except Exception as e:
+            logger.error(f"Error al restar besitos: {e}")
+            db.rollback()
+            raise
+    
+    @staticmethod
+    def update_story_progress(db: Session, user: User, new_story: str):
+        """Actualiza el progreso de la historia del usuario"""
+        try:
+            user.current_story = new_story
+            db.commit()
+            db.refresh(user)
+            logger.info(f"Historia actualizada para usuario {user.telegram_id}: {new_story}")
+            return user
+        except Exception as e:
+            logger.error(f"Error al actualizar historia: {e}")
+            db.rollback()
+            raise
+    
+    @staticmethod
+    def deactivate_user(db: Session, user: User):
+        """Desactiva un usuario"""
+        try:
+            user.is_active = False
+            db.commit()
+            db.refresh(user)
+            logger.info(f"Usuario {user.telegram_id} desactivado")
+            return user
+        except Exception as e:
+            logger.error(f"Error al desactivar usuario: {e}")
+            db.rollback()
+            raise
+    
+    @staticmethod
+    def get_active_users_count(db: Session):
+        """Obtiene el número de usuarios activos"""
+        try:
+            return db.query(User).filter(User.is_active == True).count()
+        except Exception as e:
+            logger.error(f"Error al contar usuarios activos: {e}")
+            return 0
+            
