@@ -32,6 +32,7 @@ class DianaBot:
         try:
             # Import handlers básicos
             from handlers.base_handlers import BaseHandlers
+            from handlers.mission_handlers import MissionHandlers
             
             # Comandos básicos
             self.application.add_handler(CommandHandler("start", BaseHandlers.start))
@@ -39,6 +40,7 @@ class DianaBot:
             
             # Callback queries básicos
             self.application.add_handler(CallbackQueryHandler(BaseHandlers.button_handler))
+            self.application.add_handler(CallbackQueryHandler(MissionHandlers.mission_handler, pattern="^(missions|mission_)") )
             
             logger.info("✅ Handlers configurados correctamente")
             

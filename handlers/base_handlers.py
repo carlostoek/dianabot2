@@ -121,7 +121,10 @@ class BaseHandlers:
                         parse_mode='Markdown'
                     )
                 
-                elif query.data in ["missions", "games", "story"]:
+                elif query.data == "missions":
+                    from handlers.mission_handlers import MissionHandlers
+                    await MissionHandlers._show_mission_menu(query, db, user)
+                elif query.data in ["games", "story"]:
                     await query.edit_message_text(
                         f"🎩 **{query.data.title()}**\n\n"
                         f"Esta función estará disponible muy pronto.\n\n"
