@@ -6,6 +6,13 @@ from aiogram.types import BotCommand
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.filters import CommandStart, Command
 from aiogram import Router
+from database_init import init_db
+
+async def main():
+    await init_db()  # Esto debe ir aquí
+    bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
+    dp = Dispatcher(storage=MemoryStorage())
+    ...
 
 from config import BOT_TOKEN
 from handlers import onboarding, backpack
