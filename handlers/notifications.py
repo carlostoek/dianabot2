@@ -1,11 +1,17 @@
-from aiogram import Router
-from aiogram.types import Message
+
+from aiogram import Router, types
+from aiogram.filters import Command
 from services.notification_service import NotificationService
 
-notifications_router = Router()
+router = Router()
 notification_service = NotificationService()
 
-@notifications_router.message()
-async def handle_notifications(message: Message):
-    await notification_service.create_notification(message.from_user.id, "general", "Has interactuado con el bot.", "neutral", "mayordomo")
-    await message.answer("🔔 Notificación registrada.")
+@router.message(Command("notify"))
+async def send_notification(message: types.Message):
+    user_id = message.from_user.id
+    notification = await notification_service.create_notification(user_id)
+
+    if notification:
+        await message.answer(f"{notification['character']} {notification['message']}")
+    else:
+        await message.answer("🔔 No hay notificaciones pendientes.")

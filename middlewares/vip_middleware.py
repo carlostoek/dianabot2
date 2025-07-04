@@ -1,24 +1,33 @@
+
 from aiogram import BaseMiddleware
 from aiogram.types import Message
-import sqlite3
-from config import DATABASE_PATH
+from sqlalchemy.future import select
+from database_init import get_db
+from models.core import User
+from models.vip import VIPAccess
+from datetime import datetime
 
 class VIPMiddleware(BaseMiddleware):
-    async def __call__(self, handler, event: Message, data: dict):
-        conn = sqlite3.connect(DATABASE_PATH)
-        cursor = conn.cursor()
+    async def __call__(self, handler, event, data):
+        if isinstance(event, Message):
+            user_id = event.from_user.id
+            async for session in get_db():
+                result = await session.execute(select(User).where(User.telegram_id == user_id))
+                user = result.scalar_one_or_none()
 
-        cursor.execute("""
-            SELECT COUNT(*) FROM vip_access va
-            JOIN users u ON va.user_id = u.id
-            WHERE u.telegram_id = ? AND va.is_active = 1 AND va.access_expires > datetime('now')
-        """, (event.from_user.id,))
-        is_vip = cursor.fetchone()[0] > 0
+                if user:
+                    vip_result = await session.execute(
+                        select(VIPAccess)
+                        .where(VIPAccess.user_id == user.id)
+                        .where(VIPAccess.is_active == True)
+                        .where(VIPAccess.access_expires > datetime.utcnow())
+                    )
+                    vip_access = vip_result.scalar_one_or_none()
 
-        conn.close()
+                    if vip_access:
+                        return await handler(event, data)
 
-        if not is_vip:
-            await event.answer("🔒 Esta función es solo para usuarios VIP.")
-            return
+            await event.answer("🚫 No tienes acceso VIP válido.")
+            return None
 
         return await handler(event, data)

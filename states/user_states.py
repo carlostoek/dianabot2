@@ -1,5 +1,8 @@
-from aiogram.fsm.state import State, StatesGroup
 
-class UserStates(StatesGroup):
-    user_onboarding = State()
-    viewing_backpack = State()
+from aiogram.fsm.state import StatesGroup, State
+
+class UserOnboarding(StatesGroup):
+    onboarding_complete = State()
+
+class ViewingBackpack(StatesGroup):
+    viewing = State()

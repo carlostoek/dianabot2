@@ -1,32 +1,25 @@
+
 import asyncio
-import sqlite3
-from config import DATABASE_PATH
 from aiogram import Bot
+from sqlalchemy.future import select
+from database_init import get_db
+from models.core import User
+from services.notification_service import NotificationService
 
-async def notification_scheduler(bot: Bot):
+async def send_random_notifications(bot: Bot):
+    notification_service = NotificationService()
+
     while True:
-        await asyncio.sleep(60)
+        async for session in get_db():
+            result = await session.execute(select(User))
+            users = result.scalars().all()
 
-        conn = sqlite3.connect(DATABASE_PATH)
-        cursor = conn.cursor()
+            for user in users:
+                notification = await notification_service.create_notification(user.telegram_id)
+                if notification:
+                    try:
+                        await bot.send_message(user.telegram_id, f"{notification['character']} {notification['message']}")
+                    except Exception:
+                        pass
 
-        cursor.execute("""
-            SELECT u.telegram_id, n.message
-            FROM notifications n
-            JOIN users u ON n.user_id = u.id
-            WHERE n.was_delivered = 0
-        """)
-        notifications = cursor.fetchall()
-
-        for telegram_id, message in notifications:
-            try:
-                await bot.send_message(telegram_id, f"🎲 {message}")
-                cursor.execute("""
-                    UPDATE notifications SET was_delivered = 1
-                    WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?)
-                """, (telegram_id,))
-            except Exception as e:
-                print(f"❌ Error enviando notificación a {telegram_id}: {e}")
-
-        conn.commit()
-        conn.close()
+        await asyncio.sleep(3600)  # Ejecutar cada hora

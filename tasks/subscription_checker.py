@@ -1,15 +1,17 @@
-import sqlite3
-from config import DATABASE_PATH
 
-async def check_subscriptions(bot):
-    conn = sqlite3.connect(DATABASE_PATH)
-    cursor = conn.cursor()
+from sqlalchemy.future import select
+from database_init import get_db
+from models.vip import VIPAccess
+from datetime import datetime
 
-    cursor.execute("""
-        UPDATE vip_access
-        SET is_active = 0
-        WHERE access_expires < datetime('now')
-    """)
-    conn.commit()
-    conn.close()
-    print("♻️ Suscripciones verificadas y expiradas desactivadas.")
+async def check_expired_subscriptions(bot):
+    async for session in get_db():
+        result = await session.execute(
+            select(VIPAccess).where(VIPAccess.is_active == True, VIPAccess.access_expires < datetime.utcnow())
+        )
+        expired_subs = result.scalars().all()
+
+        for vip_access in expired_subs:
+            vip_access.is_active = False
+            await bot.send_message(vip_access.user_id, "🔒 Tu acceso VIP ha expirado.")
+        await session.commit()

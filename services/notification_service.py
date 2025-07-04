@@ -1,23 +1,34 @@
-import sqlite3
-from config import DATABASE_PATH
+
+from sqlalchemy.future import select
+from database_init import get_db
+from models.notifications import Notification
+from random import choice
+from datetime import datetime
 
 class NotificationService:
-    def __init__(self):
-        self.db = DATABASE_PATH
+    async def create_notification(self, user_id):
+        characters = ["🎲 Lucien", "🍿 Mayordomo"]
+        messages = [
+            "Alguien desbloqueó algo. No sé para qué, pero aquí estamos.",
+            "Lo has logrado... probablemente por accidente.",
+            "Notificación relevante… o no tanto.",
+            "Este es uno de esos momentos en que fingimos que importa.",
+        ]
 
-    async def create_notification(self, telegram_id, notification_type, message_text, tone, character):
-        conn = sqlite3.connect(self.db)
-        cursor = conn.cursor()
+        character = choice(characters)
+        message = choice(messages)
 
-        cursor.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
-        user_id = cursor.fetchone()
+        async for session in get_db():
+            new_notification = Notification(
+                user_id=user_id,
+                notification_type="random",
+                message=message,
+                tone="sarcasm",
+                character=character,
+                was_delivered=True
+            )
+            session.add(new_notification)
+            await session.commit()
+            await session.refresh(new_notification)
 
-        if user_id:
-            cursor.execute("""
-                INSERT INTO notifications (user_id, notification_type, message, tone, character, was_delivered)
-                VALUES (?, ?, ?, ?, ?, 1)
-            """, (user_id[0], notification_type, message_text, tone, character))
-
-            conn.commit()
-
-        conn.close()
+            return {"character": character, "message": message}

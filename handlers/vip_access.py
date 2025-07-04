@@ -1,20 +1,28 @@
-from aiogram import Router, F
-from aiogram.types import Message
-from services.user_service import UserService
-from services.vip_service import VIPService
 
-vip_router = Router()
-user_service = UserService()
+from aiogram import Router, types
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from services.vip_service import VIPService
+from states.user_states import VIPValidation
+
+router = Router()
 vip_service = VIPService()
 
-@vip_router.message(F.text.startswith("🔑 Canjear "))
-async def redeem_vip_token(message: Message):
-    user = await user_service.get_or_create_user(message.from_user)
-    token = message.text.replace("🔑 Canjear ", "").strip()
+@router.message(Command("vip"))
+async def start_vip_validation(message: types.Message, state: FSMContext):
+    await message.answer("🔑 Por favor, ingresa tu token VIP:")
+    await state.set_state(VIPValidation.awaiting_token)
 
-    result = await vip_service.redeem_token(user.telegram_id, token)
+@router.message(VIPValidation.awaiting_token)
+async def validate_vip_token(message: types.Message, state: FSMContext):
+    token = message.text.strip()
+    user_id = message.from_user.id
 
-    if result:
-        await message.answer(f"🍿 Acceso VIP concedido. Bienvenido.")
+    success = await vip_service.validate_vip_token(user_id, token)
+
+    if success:
+        await message.answer("🍿 ¡Acceso VIP concedido!")
     else:
-        await message.answer("Token inválido o expirado.")
+        await message.answer("❌ Token inválido o expirado.")
+
+    await state.clear()

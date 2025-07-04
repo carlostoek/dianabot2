@@ -1,38 +1,21 @@
-import sqlite3
-from config import DATABASE_PATH
+
+from sqlalchemy.future import select
+from database_init import get_db
 from models.narrative import LorePiece
 
 class CombinationService:
-    def __init__(self):
-        self.db = DATABASE_PATH
+    async def combine_pieces(self, code1, code2):
+        async for session in get_db():
+            result = await session.execute(
+                select(LorePiece).where(LorePiece.code == code1)
+            )
+            piece1 = result.scalar_one_or_none()
 
-    async def combine(self, telegram_id, code1, code2):
-        conn = sqlite3.connect(self.db)
-        cursor = conn.cursor()
+            result = await session.execute(
+                select(LorePiece).where(LorePiece.code == code2)
+            )
+            piece2 = result.scalar_one_or_none()
 
-        cursor.execute("""
-            SELECT l.combination_result
-            FROM lore_pieces l
-            WHERE l.code = ? OR l.code = ?
-        """, (code1, code2))
-        combination = cursor.fetchone()
-
-        if combination and combination[0]:
-            cursor.execute("SELECT * FROM lore_pieces WHERE code = ?", (combination[0],))
-            new_piece = cursor.fetchone()
-
-            if new_piece:
-                cursor.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
-                user_id = cursor.fetchone()[0]
-
-                cursor.execute("""
-                    INSERT INTO user_backpacks (user_id, lore_piece_id, obtained_at)
-                    VALUES (?, ?, datetime('now'))
-                """, (user_id, new_piece[0]))
-
-                conn.commit()
-                conn.close()
-                return LorePiece(*new_piece)
-
-        conn.close()
-        return None
+            if piece1 and piece2 and piece1.combinable_with == piece2.code:
+                return piece1.combination_result
+            return None

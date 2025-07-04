@@ -1,37 +1,29 @@
-import sqlite3
-from config import DATABASE_PATH
+
+from sqlalchemy.future import select
+from database_init import get_db
 from models.core import User
-from datetime import datetime
 
 class UserService:
-    def __init__(self):
-        self.db = DATABASE_PATH
+    async def get_or_create_user(self, telegram_user):
+        async for session in get_db():
+            result = await session.execute(select(User).where(User.telegram_id == telegram_user.id))
+            user = result.scalar_one_or_none()
 
-    async def get_or_create_user(self, tg_user):
-        conn = sqlite3.connect(self.db)
-        cursor = conn.cursor()
+            if user:
+                return user
 
-        cursor.execute("SELECT * FROM users WHERE telegram_id = ?", (tg_user.id,))
-        result = cursor.fetchone()
-
-        if result:
-            user = User(*result)
-        else:
-            now = datetime.utcnow().isoformat()
-            cursor.execute(
-                "INSERT INTO users (telegram_id, username, first_name, created_at) VALUES (?, ?, ?, ?)",
-                (tg_user.id, tg_user.username, tg_user.first_name or "Usuario", now)
+            new_user = User(
+                telegram_id=telegram_user.id,
+                username=telegram_user.username,
+                first_name=telegram_user.first_name or "Usuario"
             )
-            conn.commit()
-            user_id = cursor.lastrowid
-            user = User(user_id, tg_user.id, tg_user.username, tg_user.first_name or "Usuario", False, now)
+            session.add(new_user)
+            await session.commit()
+            await session.refresh(new_user)
+            return new_user
 
-        conn.close()
-        return user
-
-    async def mark_as_onboarded(self, telegram_id):
-        conn = sqlite3.connect(self.db)
-        cursor = conn.cursor()
-        cursor.execute("UPDATE users SET is_onboarded = 1 WHERE telegram_id = ?", (telegram_id,))
-        conn.commit()
-        conn.close()
+    async def set_onboarded(self, user):
+        async for session in get_db():
+            user.is_onboarded = True
+            session.add(user)
+            await session.commit()

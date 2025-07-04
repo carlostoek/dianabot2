@@ -1,5 +1,14 @@
 
-def format_backpack(backpack):
+def welcome_message(user):
+    return f"""
+🍹 Oh, un usuario más... {user.first_name}, acompáñame, supongo.
+
+Aquí comenzarás a recolectar piezas de una historia que probablemente no te hará más interesante.
+
+¿Qué deseas hacer primero?
+""".strip()
+
+def backpack_message(backpack):
     if not backpack:
         return "👜 Tu colección miserable está vacía."
 

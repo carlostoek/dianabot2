@@ -1,36 +1,30 @@
-import sqlite3
-from config import DATABASE_PATH
+
+from sqlalchemy.future import select
+from database_init import get_db
+from models.vip import VIPToken, VIPAccess
+from models.core import User
+from datetime import datetime, timedelta
 
 class VIPService:
-    def __init__(self):
-        self.db = DATABASE_PATH
+    async def validate_vip_token(self, telegram_id, token_str):
+        async for session in get_db():
+            result = await session.execute(select(VIPToken).where(VIPToken.token == token_str))
+            token = result.scalar_one_or_none()
 
-    async def redeem_token(self, telegram_id, token):
-        conn = sqlite3.connect(self.db)
-        cursor = conn.cursor()
+            if token and token.used_count < token.max_uses and token.expires_at > datetime.utcnow():
+                token.used_count += 1
+                await session.commit()
 
-        cursor.execute("""
-            SELECT id, max_uses, used_count, expires_at FROM vip_tokens
-            WHERE token = ? AND used_count < max_uses AND expires_at > datetime('now')
-        """, (token,))
-        vip_token = cursor.fetchone()
+                user_result = await session.execute(select(User).where(User.telegram_id == telegram_id))
+                user = user_result.scalar_one_or_none()
 
-        if vip_token:
-            cursor.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
-            user_id = cursor.fetchone()[0]
-
-            cursor.execute("""
-                INSERT INTO vip_access (user_id, channel_id, access_granted, access_expires, is_active)
-                VALUES (?, 1, datetime('now'), datetime('now', '+30 days'), 1)
-            """, (user_id,))
-
-            cursor.execute("""
-                UPDATE vip_tokens SET used_count = used_count + 1 WHERE id = ?
-            """, (vip_token[0],))
-
-            conn.commit()
-            conn.close()
-            return True
-
-        conn.close()
-        return False
+                if user:
+                    vip_access = VIPAccess(
+                        user_id=user.id,
+                        channel_id=123456789,
+                        access_expires=datetime.utcnow() + timedelta(days=30)
+                    )
+                    session.add(vip_access)
+                    await session.commit()
+                    return True
+            return False

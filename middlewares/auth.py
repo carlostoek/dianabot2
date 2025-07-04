@@ -1,11 +1,11 @@
+
 from aiogram import BaseMiddleware
 from aiogram.types import Message
-
-ADMIN_IDS = [123456789]  # Sustituye por el ID real del administrador
+from config import ADMINS
 
 class AdminAuthMiddleware(BaseMiddleware):
-    async def __call__(self, handler, event: Message, data: dict):
-        if event.from_user.id not in ADMIN_IDS:
-            await event.answer("🔒 Acceso restringido solo para administradores.")
-            return
+    async def __call__(self, handler, event, data):
+        if isinstance(event, Message) and event.from_user.id not in ADMINS:
+            await event.answer("🚫 No tienes permisos para acceder a esta sección.")
+            return None
         return await handler(event, data)

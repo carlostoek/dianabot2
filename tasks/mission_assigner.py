@@ -1,23 +1,32 @@
-import sqlite3
-from config import DATABASE_PATH
+
+from sqlalchemy.future import select
+from database_init import get_db
+from models.core import User
+from models.gamification import Mission, UserMission
+from datetime import datetime
 
 async def assign_daily_missions(bot):
-    conn = sqlite3.connect(DATABASE_PATH)
-    cursor = conn.cursor()
+    async for session in get_db():
+        result = await session.execute(select(User))
+        users = result.scalars().all()
 
-    cursor.execute("SELECT id FROM users")
-    users = cursor.fetchall()
+        mission_result = await session.execute(select(Mission).where(Mission.mission_type == "daily"))
+        daily_missions = mission_result.scalars().all()
 
-    cursor.execute("SELECT id FROM missions")
-    missions = cursor.fetchall()
+        for user in users:
+            for mission in daily_missions:
+                new_user_mission = UserMission(
+                    user_id=user.id,
+                    mission_id=mission.id,
+                    progress=0,
+                    completed=False,
+                    claimed=False
+                )
+                session.add(new_user_mission)
 
-    for user in users:
-        for mission in missions:
-            cursor.execute("""
-                INSERT OR IGNORE INTO user_missions (user_id, mission_id)
-                VALUES (?, ?)
-            """, (user[0], mission[0]))
+            try:
+                await bot.send_message(user.telegram_id, "🎯 Tienes nuevas misiones diarias disponibles.")
+            except Exception:
+                pass
 
-    conn.commit()
-    conn.close()
-    print("📅 Misiones diarias asignadas.")
+        await session.commit()

@@ -1,33 +1,42 @@
-from aiogram import Router, F
-from aiogram.types import Message
-from services.user_service import UserService
-from services.gamification_service import GamificationService
 
-gamification_router = Router()
-user_service = UserService()
+from aiogram import Router, types
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from services.gamification_service import GamificationService
+from utils.keyboards import get_mission_keyboard
+from states.user_states import SelectingMission, PlayingMinigame
+
+router = Router()
 gamification_service = GamificationService()
 
-@gamification_router.message(F.text == "🎯 Misiones Diarias")
-async def show_daily_missions(message: Message):
-    user = await user_service.get_or_create_user(message.from_user)
-    missions = await gamification_service.get_daily_missions(user.telegram_id)
+@router.message(Command("missions"))
+async def show_missions(message: types.Message, state: FSMContext):
+    missions = await gamification_service.get_available_missions(message.from_user.id)
 
-    if not missions:
-        await message.answer("No tienes misiones asignadas por ahora.")
-        return
-
-    response = "🎯 Tus Misiones Diarias:\n\n"
-    for mission in missions:
-        response += f"🔹 {mission.title}: {mission.description}\n"
-
-    await message.answer(response)
-
-@gamification_router.message(F.text == "🎁 Reclamar Recompensa Diaria")
-async def claim_daily_reward(message: Message):
-    user = await user_service.get_or_create_user(message.from_user)
-    reward = await gamification_service.claim_daily_gift(user.telegram_id)
-
-    if reward:
-        await message.answer(f"Has reclamado {reward.besitos_reward} 💎 besitos y {reward.lore_reward} piezas de lore.")
+    if missions:
+        await message.answer("🎯 Estas son tus gloriosas pérdidas de tiempo:", reply_markup=get_mission_keyboard(missions))
+        await state.set_state(SelectingMission.selecting)
     else:
-        await message.answer("Ya reclamaste tu recompensa diaria hoy.")
+        await message.answer("🎯 No tienes misiones disponibles en este momento.")
+
+@router.callback_query(SelectingMission.selecting)
+async def select_mission(callback: types.CallbackQuery, state: FSMContext):
+    mission_id = int(callback.data.split("_")[1])
+    await gamification_service.start_mission(callback.from_user.id, mission_id)
+
+    await callback.message.answer("🎮 Has comenzado una misión. Responde 'jugar' para continuar.")
+    await state.set_state(PlayingMinigame.playing)
+
+@router.message(PlayingMinigame.playing)
+async def play_minigame(message: types.Message, state: FSMContext):
+    if message.text.lower() == "jugar":
+        success = await gamification_service.complete_mission(message.from_user.id)
+
+        if success:
+            await message.answer("🎁 Misión completada. Has ganado besitos y probablemente algo más inútil.")
+        else:
+            await message.answer("❌ No pudiste completar la misión. Inténtalo de nuevo.")
+
+        await state.clear()
+    else:
+        await message.answer("🎮 Escribe 'jugar' para intentar completar la misión.")
