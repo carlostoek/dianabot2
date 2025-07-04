@@ -38,3 +38,9 @@ def init_db():
     Base.metadata.create_all(bind=engine)
     print("✅ Base de datos inicializada correctamente")
     print("📊 Tablas creadas: users, missions, user_missions, game_sessions, game_leaderboards")
+
+def reset_db():
+    """Resetea la base de datos (solo para desarrollo)"""
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    print("\ud83d\udd04 Base de datos reseteada")

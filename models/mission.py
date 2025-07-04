@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, DateTime, BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .base import BaseModel
@@ -19,7 +19,7 @@ class Mission(BaseModel):
 class UserMission(BaseModel):
     __tablename__ = 'user_missions'
     
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey('users.id'), nullable=False)
     mission_id = Column(String(50), nullable=False)
     is_completed = Column(Boolean, default=False)
     completion_date = Column(String(10))  # YYYY-MM-DD format

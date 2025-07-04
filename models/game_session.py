@@ -1,11 +1,11 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, Float
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, Float, BigInteger
 from sqlalchemy.orm import relationship
 from .base import BaseModel
 
 class GameSession(BaseModel):
     __tablename__ = 'game_sessions'
     
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey('users.id'), nullable=False)
     game_type = Column(String(50), nullable=False)
     status = Column(String(20), default='active')
     score = Column(Integer, default=0)
@@ -22,7 +22,7 @@ class GameSession(BaseModel):
 class GameLeaderboard(BaseModel):
     __tablename__ = 'game_leaderboards'
     
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey('users.id'), nullable=False)
     game_type = Column(String(50), nullable=False)
     best_score = Column(Integer, default=0)
     total_games = Column(Integer, default=0)
