@@ -1,11 +1,2 @@
-# Librerías externas necesarias
 aiogram==3.0.0
 python-dotenv==1.0.0
-
-# Módulos estándar utilizados (ya incluidos en Python, aquí solo como referencia)
-asyncio
-sqlite3
-os
-logging
-dataclasses
-datetime
