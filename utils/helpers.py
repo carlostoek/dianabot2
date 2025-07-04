@@ -5,15 +5,17 @@ def format_backpack(backpack_items):
     return "\n".join([f"🔹 {item.title} ({item.rarity})" for item in backpack_items])
 
 def get_onboarding_keyboard():
-    from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+    """Return main menu as inline keyboard."""
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
     keyboard = [
-        [KeyboardButton(text="✨ Conocer a Diana")],
-        [KeyboardButton(text="👜 Abrir mi colección miserable")],
-        [KeyboardButton(text="🎯 Misiones Diarias")],
-        [KeyboardButton(text="🎁 Reclamar Recompensa Diaria")]
+        [InlineKeyboardButton(text="✨ Conocer a Diana", callback_data="intro_diana")],
+        [InlineKeyboardButton(text="👜 Abrir mi colección", callback_data="open_backpack")],
+        [InlineKeyboardButton(text="🎯 Misiones Diarias", callback_data="daily_missions")],
+        [InlineKeyboardButton(text="🎁 Reclamar Recompensa Diaria", callback_data="claim_daily")],
     ]
-    return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
+
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 def validate_piece_code(code):
     return code.isalnum() and len(code) <= 10
