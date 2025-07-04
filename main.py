@@ -1,22 +1,12 @@
-
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.filters import CommandStart, Command
-from aiogram import Router
-from database_init import init_db
-
-async def main():
-    await init_db()  # Esto debe ir aquí
-    bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
-    dp = Dispatcher(storage=MemoryStorage())
-    ...
-
 from config import BOT_TOKEN
 from handlers import onboarding, backpack
 from utils.middlewares import error_handler
+from database_init import init_db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,6 +20,8 @@ async def set_bot_commands(bot: Bot):
     await bot.set_my_commands(commands)
 
 async def main():
+    await init_db()  # Crear tablas antes de iniciar el bot
+
     bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
     dp = Dispatcher(storage=MemoryStorage())
 
