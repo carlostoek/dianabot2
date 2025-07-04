@@ -8,7 +8,10 @@ def get_onboarding_keyboard():
     from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
     keyboard = [
-        [KeyboardButton(text="👜 Abrir mi colección miserable")]
+        [KeyboardButton(text="✨ Conocer a Diana")],
+        [KeyboardButton(text="👜 Abrir mi colección miserable")],
+        [KeyboardButton(text="🎯 Misiones Diarias")],
+        [KeyboardButton(text="🎁 Reclamar Recompensa Diaria")]
     ]
     return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
 
