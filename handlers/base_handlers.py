@@ -2,6 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from core.database import get_db_session
 from services.user_service import UserService
+from services.mission_tracker import MissionTracker
 from utils.keyboards import main_menu, back_to_main
 from utils.formatters import MessageFormatter
 import logging
@@ -96,19 +97,40 @@ class BaseHandlers:
             
             try:
                 user = UserService.get_user_by_telegram_id(db, user_data.id)
-                
+
                 if not user:
                     await query.edit_message_text(
                         "❌ Usuario no encontrado. Use /start para registrarse.",
                         reply_markup=back_to_main()
                     )
                     return
-                
+
+                notification = ""
+
+                # TRACKING DE MISIONES
+                session_data = MissionTracker.get_user_session_data(db, user)
+
+                if query.data in ["missions", "games", "profile", "story"]:
+                    if "sections_visited" not in session_data:
+                        session_data["sections_visited"] = []
+
+                    if query.data not in session_data["sections_visited"]:
+                        session_data["sections_visited"].append(query.data)
+
+                    completed_missions = MissionTracker.track_action(
+                        db, user, "menu_visit",
+                        {"sections_visited": session_data["sections_visited"]}
+                    )
+
+                    if completed_missions:
+                        mission_names = [m["name"] for m in completed_missions]
+                        notification = f"\n\n🎉 **¡Misiones completadas!**\n✅ {', '.join(mission_names)}"
+
                 # Manejar diferentes callbacks
                 if query.data == "main_menu":
                     welcome_text = MessageFormatter.welcome_message(user, False)
                     await query.edit_message_text(
-                        welcome_text,
+                        welcome_text + notification,
                         reply_markup=main_menu(),
                         parse_mode='Markdown'
                     )

@@ -14,34 +14,38 @@ class MissionService:
         {
             "id": "daily_1",
             "name": "Primeros pasos",
-            "description": "Explora el menú principal del bot",
+            "description": "Visita 2 secciones diferentes del menú",
             "reward": 50,
             "required_level": 1,
-            "type": "exploration"
+            "type": "exploration",
+            "auto_complete": True
         },
         {
-            "id": "daily_2", 
+            "id": "daily_2",
             "name": "Explorador curioso",
-            "description": "Visita todas las secciones disponibles",
+            "description": "Visita 3 secciones diferentes del bot",
             "reward": 100,
             "required_level": 1,
-            "type": "exploration"
+            "type": "exploration",
+            "auto_complete": True
         },
         {
             "id": "daily_3",
             "name": "Jugador dedicado",
-            "description": "Participa en un juego",
+            "description": "Juega cualquier juego disponible",
             "reward": 150,
             "required_level": 2,
-            "type": "gaming"
+            "type": "gaming",
+            "auto_complete": True
         },
         {
             "id": "daily_4",
-            "name": "Coleccionista de historias",
-            "description": "Lee una historia completa",
+            "name": "Lector de historias",
+            "description": "Lee una escena de la historia",
             "reward": 200,
             "required_level": 2,
-            "type": "story"
+            "type": "story",
+            "auto_complete": True
         },
         {
             "id": "daily_5",
@@ -49,7 +53,8 @@ class MissionService:
             "description": "Completa 3 misiones en un día",
             "reward": 300,
             "required_level": 3,
-            "type": "achievement"
+            "type": "achievement",
+            "auto_complete": True
         }
     ]
     
