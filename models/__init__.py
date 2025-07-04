@@ -1,1 +1,3 @@
-# Este archivo permite que la carpeta models sea un paquete importable
+"""
+Models module - Modelos de base de datos
+"""
