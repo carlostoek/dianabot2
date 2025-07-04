@@ -1,4 +1,3 @@
-
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from config import DATABASE_URL
@@ -9,6 +8,7 @@ AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=F
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
+
 # Crear tablas al iniciar el bot
 async def init_db():
     async with engine.begin() as conn:
@@ -18,6 +18,7 @@ async def init_db():
         from models.gamification import Base as GamificationBase
         from models.notifications import Base as NotificationBase
 
+        # Crear todas las tablas
         await conn.run_sync(CoreBase.metadata.create_all)
         await conn.run_sync(NarrativeBase.metadata.create_all)
         await conn.run_sync(VipBase.metadata.create_all)
