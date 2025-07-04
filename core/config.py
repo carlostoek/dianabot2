@@ -5,7 +5,16 @@ load_dotenv()
 
 class Config:
     BOT_TOKEN = os.getenv('BOT_TOKEN')
-    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///dianabot.db')
+    
+    # Detectar automáticamente el tipo de base de datos
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    if not DATABASE_URL:
+        DATABASE_URL = 'sqlite:///dianabot.db'
+    
+    # Railway a veces usa postgres:// en lugar de postgresql://
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    
     DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
     
     # Configuración del juego
