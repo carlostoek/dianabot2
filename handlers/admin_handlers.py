@@ -12,6 +12,7 @@ from models.user import User, UserRole
 from sqlalchemy import func  # Import necesario para funciones agregadas
 from config import ADMINS
 import logging
+from services.token_service import TokenService
 
 logger = logging.getLogger(__name__)
 
@@ -83,8 +84,8 @@ class AdminHandlers:
                 await AdminHandlers._show_users_management(query)
             elif query.data == "admin_channels":
                 await AdminHandlers._show_channels_management(query)
-            elif query.data == "admin_tokens":
-                await AdminHandlers._show_tokens_management(query)
+            elif query.data == "admin_generate_token":
+                await AdminHandlers._start_token_config(query, context)
             elif query.data == "admin_stats":
                 await AdminHandlers._show_stats(query)
             elif query.data == "admin_broadcast":
@@ -174,24 +175,147 @@ class AdminHandlers:
         await ChannelHandlers._show_channel_menu(query)
 
     @staticmethod
-    async def _show_tokens_management(query):
-        """Muestra gestión de tokens - SIN MARKDOWN"""
-        text = (
-            "🎫 Gestión de Tokens de Entrada\n\n"
-            "🚧 Próximamente disponible:\n"
-            "• Generar tokens VIP personalizados\n"
-            "• Configurar duración de tokens\n"
-            "• Ver tokens activos/expirados\n"
-            "• Revocar tokens específicos\n"
-            "• Estadísticas de uso\n\n"
-            "Sistema de monetización directa."
+    async def _start_token_config(query: Update.callback_query, context: ContextTypes.DEFAULT_TYPE):
+        """Inicia el proceso de configuración de un nuevo token."""
+        user_id = query.from_user.id
+        if not AdminHandlers.is_admin(user_id):
+            await query.edit_message_text("❌ No tienes permisos de administrador.")
+            return
+
+        context.user_data[user_id] = {
+            "state": "WAITING_FOR_TOKEN_NAME"
+        }
+        await query.edit_message_text(
+            "📝 Por favor, ingresa el **nombre** del nuevo token:",
+            parse_mode="Markdown"
         )
 
-        await query.edit_message_text(
-            text,
-            reply_markup=admin_keyboards.back_to_admin_keyboard()
-            # ✅ SIN parse_mode
-        )
+    @staticmethod
+    async def handle_token_name_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Maneja la entrada del nombre del token."""
+        user_id = update.effective_user.id
+        if not AdminHandlers.is_admin(user_id):
+            await update.message.reply_text("❌ No tienes permisos de administrador.")
+            return
+
+        if context.user_data.get(user_id, {}).get("state") == "WAITING_FOR_TOKEN_NAME":
+            token_name = update.message.text
+            if not token_name:
+                await update.message.reply_text("El nombre del token no puede estar vacío. Por favor, inténtalo de nuevo.")
+                return
+
+            db = get_db_session()
+            try:
+                existing_token = TokenService.get_token_by_name(db, token_name)
+                if existing_token:
+                    await update.message.reply_text(
+                        f"Ya existe un token con el nombre '{token_name}'. Por favor, elige otro nombre."
+                    )
+                    return
+            finally:
+                db.close()
+
+            context.user_data[user_id]["token_name"] = token_name
+            context.user_data[user_id]["state"] = "WAITING_FOR_TOKEN_DURATION"
+
+            keyboard = [
+                [InlineKeyboardButton("1 Día", callback_data="token_duration_1")],
+                [InlineKeyboardButton("1 Semana", callback_data="token_duration_7")],
+                [InlineKeyboardButton("2 Semanas", callback_data="token_duration_14")],
+                [InlineKeyboardButton("1 Mes", callback_data="token_duration_30")],
+                [InlineKeyboardButton("◀️ Cancelar", callback_data="cancel_token_config")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            await update.message.reply_text(
+                f"Has nombrado el token como **'{token_name}'**. Ahora, selecciona la **duración**:",
+                reply_markup=reply_markup,
+                parse_mode="Markdown"
+            )
+        else:
+            await update.message.reply_text("❌ Comando inesperado. Usa /admin para empezar.")
+
+    @staticmethod
+    async def handle_token_duration_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Maneja la selección de duración del token."""
+        query = update.callback_query
+        await query.answer()
+
+        user_id = query.from_user.id
+        if not AdminHandlers.is_admin(user_id):
+            await query.edit_message_text("❌ No tienes permisos de administrador.")
+            return
+
+        if query.data == "cancel_token_config":
+            if user_id in context.user_data:
+                del context.user_data[user_id]
+            await query.edit_message_text(
+                "Configuración de token cancelada.",
+                reply_markup=admin_keyboards.admin_main_menu(),
+                parse_mode="Markdown"
+            )
+            return
+
+        if context.user_data.get(user_id, {}).get("state") == "WAITING_FOR_TOKEN_DURATION":
+            try:
+                duration_days = int(query.data.replace("token_duration_", ""))
+                context.user_data[user_id]["token_duration"] = duration_days
+                context.user_data[user_id]["state"] = "WAITING_FOR_TOKEN_PRICE"
+
+                await query.edit_message_text(
+                    f"Duración seleccionada: **{duration_days} días**. Ahora, ingresa el **precio** del token (ej. 10.50):",
+                    parse_mode="Markdown"
+                )
+            except ValueError:
+                await query.edit_message_text("❌ Duración inválida. Por favor, selecciona una opción válida.")
+        else:
+            await query.edit_message_text("❌ Comando inesperado. Usa /admin para empezar.")
+
+    @staticmethod
+    async def handle_token_price_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Maneja la entrada del precio del token y guarda el token."""
+        user_id = update.effective_user.id
+        if not AdminHandlers.is_admin(user_id):
+            await update.message.reply_text("❌ No tienes permisos de administrador.")
+            return
+
+        if context.user_data.get(user_id, {}).get("state") == "WAITING_FOR_TOKEN_PRICE":
+            try:
+                token_price = float(update.message.text)
+                if token_price < 0:
+                    await update.message.reply_text("El precio no puede ser negativo. Por favor, ingresa un precio válido.")
+                    return
+
+                token_name = context.user_data[user_id]["token_name"]
+                token_duration = context.user_data[user_id]["token_duration"]
+
+                db = get_db_session()
+                try:
+                    new_token = TokenService.create_token(db, token_name, token_duration, token_price)
+                    await update.message.reply_text(
+                        f"✅ Token **'{new_token.name}'** creado exitosamente:\n"
+                        f"Duración: **{new_token.duration_days} días**\n"
+                        f"Precio: **{new_token.price:.2f}**",
+                        reply_markup=admin_keyboards.admin_main_menu(),
+                        parse_mode="Markdown"
+                    )
+                except Exception as e:
+                    logger.error(f"Error al guardar el token en DB: {e}")
+                    await update.message.reply_text(
+                        "❌ Error al guardar el token. Por favor, inténtalo de nuevo.",
+                        reply_markup=admin_keyboards.admin_main_menu()
+                    )
+                finally:
+                    db.close()
+
+                # Limpiar el estado del usuario
+                if user_id in context.user_data:
+                    del context.user_data[user_id]
+
+            except ValueError:
+                await update.message.reply_text("❌ Precio inválido. Por favor, ingresa un número (ej. 10.50).")
+        else:
+            await update.message.reply_text("❌ Comando inesperado. Usa /admin para empezar.")
 
     @staticmethod
     async def _show_stats(query):

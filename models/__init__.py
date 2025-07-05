@@ -10,3 +10,4 @@ from .channel import (
     ChannelMembership,
     ChannelType,
 )
+from .token import Token

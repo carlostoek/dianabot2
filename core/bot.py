@@ -40,6 +40,7 @@ class DianaBot:
             # Import handlers
             from handlers.base_handlers import BaseHandlers
             from handlers.admin_handlers import AdminHandlers
+from states.admin_states import TokenConfig
             from handlers.channel_handlers import ChannelHandlers
             from services.admin_commands import AdminCommands  # ← AÑADIR
 
@@ -59,8 +60,32 @@ class DianaBot:
             # ✅ AÑADIR HANDLER ESPECÍFICO PARA CANALES
             self.application.add_handler(
                 CallbackQueryHandler(
+                    AdminHandlers._start_token_config,
+                    pattern="^admin_generate_token$"
+                )
+            )
+            self.application.add_handler(
+                MessageHandler(
+                    filters.TEXT & ~filters.COMMAND,
+                    AdminHandlers.handle_token_name_input
+                )
+            )
+            self.application.add_handler(
+                CallbackQueryHandler(
+                    AdminHandlers.handle_token_duration_callback,
+                    pattern="^token_duration_"
+                )
+            )
+            self.application.add_handler(
+                MessageHandler(
+                    filters.TEXT & ~filters.COMMAND,
+                    AdminHandlers.handle_token_price_input
+                )
+            )
+            self.application.add_handler(
+                CallbackQueryHandler(
                     ChannelHandlers.channel_management_handler,
-                    pattern="^(channel_|admin_channels|register_|tariff_|set_price_|generate_token_|show_tariffs_|members_|config_).*$"
+                    pattern="^(channel_|admin_channels|register_|tariff_|set_price_|show_tariffs_|members_|config_).*$"
                 )
             )
 
