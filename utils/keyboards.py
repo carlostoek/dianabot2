@@ -1,41 +1,280 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    KeyboardButton,
+)
+from models.user import User
+from typing import List, Optional, Dict, Any
 
+class UserKeyboards:
+    """Teclados intuitivos optimizados para usuarios no técnicos"""
+
+    def __init__(self):
+        # Emojis consistentes para toda la experiencia
+        self.EMOJIS = {
+            # Navegación principal
+            "home": "🏠",
+            "back": "◀️",
+            "next": "▶️",
+            "up": "⬆️",
+            "down": "⬇️",
+            "refresh": "🔄",
+            "close": "❌",
+            "menu": "📋",
+            # Acciones principales
+            "play": "🎮",
+            "missions": "🎯",
+            "bag": "🎒",
+            "gift": "🎁",
+            "shop": "🛒",
+            "auctions": "🏆",
+            "profile": "👤",
+            "stats": "📊",
+            "help": "❓",
+            "settings": "⚙️",
+            # Estados y feedback
+            "success": "✅",
+            "error": "❌",
+            "warning": "⚠️",
+            "info": "ℹ️",
+            "new": "🆕",
+            "hot": "🔥",
+            "cool": "😎",
+            "love": "💕",
+            # Recursos del juego
+            "besitos": "💋",
+            "level": "⭐",
+            "xp": "⚡",
+            "vip": "👑",
+            "time": "⏰",
+            "count": "🔢",
+            # Juegos y actividades
+            "trivia": "🧠",
+            "numbers": "🔢",
+            "math": "🧮",
+            "memory": "🧩",
+            "treasure": "💎",
+            # Narrativa
+            "story": "📖",
+            "scroll": "📜",
+            "map": "🗺️",
+            "key": "🗝️",
+            "secret": "🤫",
+            # Social
+            "friends": "👥",
+            "chat": "💬",
+            "reaction": "❤️",
+            "share": "📤",
+            # Admin
+            "admin": "🔧",
+            "users": "👥",
+            "channels": "📢",
+            "tokens": "🎫",
+            "broadcast": "📤",
+            "config": "⚙️",
+        }
+
+    def main_menu_keyboard(self, user: User) -> InlineKeyboardMarkup:
+        """Menú principal - Diseñado para máxima claridad"""
+        buttons = []
+
+        # Primera fila - Actividades principales
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['missions']} Misiones",
+                callback_data="missions",
+            ),
+            InlineKeyboardButton(
+                f"{self.EMOJIS['play']} Juegos",
+                callback_data="games"
+            ),
+        ])
+
+        # Segunda fila - Perfil y Historia
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['profile']} Perfil",
+                callback_data="profile"
+            ),
+            InlineKeyboardButton(
+                f"{self.EMOJIS['story']} Historia",
+                callback_data="story"
+            ),
+        ])
+
+        # Tercera fila - Ayuda
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['help']} Ayuda",
+                callback_data="help"
+            ),
+        ])
+
+        return InlineKeyboardMarkup(buttons)
+
+    def back_to_main_keyboard(self) -> InlineKeyboardMarkup:
+        """Botón para volver al menú principal"""
+        return InlineKeyboardMarkup([[
+            InlineKeyboardButton(
+                f"{self.EMOJIS['home']} Menú Principal",
+                callback_data="main_menu"
+            )
+        ]])
+
+    def missions_menu_keyboard(self) -> InlineKeyboardMarkup:
+        """Menú de misiones"""
+        buttons = [
+            [InlineKeyboardButton(
+                f"{self.EMOJIS['time']} Misiones Diarias",
+                callback_data="mission_daily"
+            )],
+            [InlineKeyboardButton(
+                f"{self.EMOJIS['back']} Volver",
+                callback_data="main_menu"
+            )]
+        ]
+        return InlineKeyboardMarkup(buttons)
+
+    def games_menu_keyboard(self) -> InlineKeyboardMarkup:
+        """Menú de juegos"""
+        buttons = [
+            [InlineKeyboardButton(
+                f"{self.EMOJIS['trivia']} Trivia",
+                callback_data="game_trivia"
+            )],
+            [InlineKeyboardButton(
+                f"{self.EMOJIS['treasure']} Ruleta",
+                callback_data="game_roulette"
+            )],
+            [InlineKeyboardButton(
+                f"{self.EMOJIS['back']} Volver",
+                callback_data="main_menu"
+            )]
+        ]
+        return InlineKeyboardMarkup(buttons)
+
+class AdminKeyboards:
+    """Teclados para administradores"""
+
+    def __init__(self):
+        self.EMOJIS = {
+            "admin": "🔧",
+            "users": "👥",
+            "channels": "📢",
+            "tokens": "🎫",
+            "stats": "📊",
+            "broadcast": "📤",
+            "config": "⚙️",
+            "back": "◀️",
+            "home": "🏠",
+        }
+
+    def admin_main_menu(self) -> InlineKeyboardMarkup:
+        """Menú principal de administrador"""
+        buttons = [
+            [
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['users']} Gestión de Usuarios",
+                    callback_data="admin_users"
+                ),
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['channels']} Gestión de Canales",
+                    callback_data="admin_channels"
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['tokens']} Gestión de Tokens",
+                    callback_data="admin_tokens"
+                ),
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['stats']} Estadísticas",
+                    callback_data="admin_stats"
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['broadcast']} Broadcast",
+                    callback_data="admin_broadcast"
+                ),
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['config']} Configuración",
+                    callback_data="admin_config"
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['home']} Menú Usuario",
+                    callback_data="main_menu"
+                )
+            ]
+        ]
+        return InlineKeyboardMarkup(buttons)
+
+    def back_to_admin_keyboard(self) -> InlineKeyboardMarkup:
+        """Botón para volver al menú admin"""
+        return InlineKeyboardMarkup([[
+            InlineKeyboardButton(
+                f"{self.EMOJIS['back']} Panel Admin",
+                callback_data="admin_menu"
+            )
+        ]])
+
+# Instancias globales para compatibilidad
+user_keyboards = UserKeyboards()
+admin_keyboards = AdminKeyboards()
+
+# Funciones de compatibilidad con el código existente
 def main_menu():
-    """Menú principal del bot"""
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🎯 Misiones", callback_data="missions")],
-        [InlineKeyboardButton("🎮 Juegos", callback_data="games")],
-        [InlineKeyboardButton("👤 Perfil", callback_data="profile")],
-        [InlineKeyboardButton("📖 Historia", callback_data="story")]
-    ])
+    """Función de compatibilidad"""
+    class DummyUser:
+        def __init__(self):
+            self.level = 1
+            self.besitos = 100
+
+    dummy_user = DummyUser()
+    return user_keyboards.main_menu_keyboard(dummy_user)
 
 def back_to_main():
-    """Botón para volver al menú principal"""
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("⬅️ Menú Principal", callback_data="main_menu")]
-    ])
+    """Función de compatibilidad"""
+    return user_keyboards.back_to_main_keyboard()
 
 def missions_menu():
-    """Menú de misiones"""
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("📅 Misiones Diarias", callback_data="daily_missions")],
-        [InlineKeyboardButton("🏆 Logros", callback_data="achievements")],
-        [InlineKeyboardButton("⬅️ Volver", callback_data="main_menu")]
-    ])
+    """Función de compatibilidad"""
+    return user_keyboards.missions_menu_keyboard()
 
 def games_menu():
-    """Menú de juegos"""
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🧠 Trivia", callback_data="game_trivia")],
-        [InlineKeyboardButton("🗺️ Aventura", callback_data="game_adventure")],
-        [InlineKeyboardButton("⬅️ Volver", callback_data="main_menu")]
-    ])
+    """Función de compatibilidad"""
+    return user_keyboards.games_menu_keyboard()
+
+def get_admin_menu():
+    """Función que faltaba para admin"""
+    return admin_keyboards.admin_main_menu()
 
 def profile_menu():
     """Menú de perfil"""
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 Estadísticas", callback_data="stats")],
-        [InlineKeyboardButton("🎨 Personalizar", callback_data="customize")],
-        [InlineKeyboardButton("⬅️ Volver", callback_data="main_menu")]
-    ])
-  
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton("📊 Estadísticas", callback_data="stats"),
+        InlineKeyboardButton("🎨 Personalizar", callback_data="customize")
+    ], [
+        InlineKeyboardButton("◀️ Volver", callback_data="main_menu")
+    ]])
+
+# Aliases y utilidades para compatibilidad con código antiguo
+def get_main_menu():
+    """Alias para obtener el menú principal"""
+    return main_menu()
+
+def get_mission_keyboard(missions: List[Any]) -> InlineKeyboardMarkup:
+    """Genera un teclado para seleccionar misiones"""
+    buttons = []
+    for m in missions:
+        title = getattr(m, "title", str(m))
+        mission_id = getattr(m, "id", 0)
+        buttons.append([InlineKeyboardButton(title, callback_data=f"mission_{mission_id}")])
+    if not buttons:
+        buttons.append([InlineKeyboardButton("❌ Sin misiones", callback_data="main_menu")])
+    buttons.append([InlineKeyboardButton("◀️ Volver", callback_data="main_menu")])
+    return InlineKeyboardMarkup(buttons)
+
