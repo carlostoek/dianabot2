@@ -8,7 +8,7 @@ from models.user import User
 from typing import List, Optional, Dict, Any
 
 class UserKeyboards:
-    """Teclados intuitivos optimizados para usuarios no técnicos"""
+    """Teclados diferenciados por rol de usuario"""
 
     def __init__(self):
         # Emojis consistentes para toda la experiencia
@@ -74,6 +74,157 @@ class UserKeyboards:
             "broadcast": "📤",
             "config": "⚙️",
         }
+
+    def get_main_menu_by_role(self, user: User) -> InlineKeyboardMarkup:
+        """Retorna el menú principal según el rol del usuario"""
+        if user.is_admin:
+            return self.admin_main_menu()
+        elif user.is_vip:
+            return self.vip_main_menu(user)
+        else:
+            return self.free_main_menu(user)
+
+    def admin_main_menu(self) -> InlineKeyboardMarkup:
+        """Menú principal para administradores"""
+        buttons = [
+            [
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['users']} Gestión de Usuarios",
+                    callback_data="admin_users",
+                ),
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['channels']} Gestión de Canales",
+                    callback_data="admin_channels",
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['tokens']} Tokens de Entrada",
+                    callback_data="admin_tokens",
+                ),
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['stats']} Estadísticas",
+                    callback_data="admin_stats",
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['broadcast']} Envío Masivo",
+                    callback_data="admin_broadcast",
+                ),
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['config']} Configuración",
+                    callback_data="admin_config",
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['play']} Vista de Usuario",
+                    callback_data="switch_to_user_view",
+                )
+            ],
+        ]
+        return InlineKeyboardMarkup(buttons)
+
+    def vip_main_menu(self, user: User) -> InlineKeyboardMarkup:
+        """Menú principal para usuarios VIP"""
+        buttons = []
+
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['treasure']} Contenido Premium",
+                callback_data="vip_premium_content",
+            ),
+            InlineKeyboardButton(
+                f"{self.EMOJIS['auctions']} Subastas VIP",
+                callback_data="vip_auctions",
+            ),
+        ])
+
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['missions']} Misiones VIP",
+                callback_data="missions",
+            ),
+            InlineKeyboardButton(
+                f"{self.EMOJIS['play']} Juegos VIP",
+                callback_data="games",
+            ),
+        ])
+
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['profile']} Mi Perfil VIP",
+                callback_data="profile",
+            ),
+            InlineKeyboardButton(
+                f"{self.EMOJIS['gift']} Beneficios VIP",
+                callback_data="vip_benefits",
+            ),
+        ])
+
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['story']} Historia Exclusiva",
+                callback_data="story",
+            ),
+            InlineKeyboardButton(
+                f"{self.EMOJIS['help']} Soporte VIP",
+                callback_data="vip_support",
+            ),
+        ])
+
+        return InlineKeyboardMarkup(buttons)
+
+    def free_main_menu(self, user: User) -> InlineKeyboardMarkup:
+        """Menú principal para usuarios gratuitos"""
+        buttons = []
+
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['missions']} Misiones",
+                callback_data="missions",
+            ),
+            InlineKeyboardButton(
+                f"{self.EMOJIS['play']} Juegos",
+                callback_data="games",
+            ),
+        ])
+
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['profile']} Mi Perfil",
+                callback_data="profile",
+            ),
+            InlineKeyboardButton(
+                f"{self.EMOJIS['story']} Historia",
+                callback_data="story",
+            ),
+        ])
+
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['vip']} ¡Hazte VIP!",
+                callback_data="upgrade_to_vip",
+            ),
+            InlineKeyboardButton(
+                f"{self.EMOJIS['hot']} Canal Baby",
+                callback_data="join_baby_channel",
+            ),
+        ])
+
+        buttons.append([
+            InlineKeyboardButton(
+                f"{self.EMOJIS['shop']} Tienda",
+                callback_data="shop",
+            ),
+            InlineKeyboardButton(
+                f"{self.EMOJIS['help']} Ayuda",
+                callback_data="help",
+            ),
+        ])
+
+        return InlineKeyboardMarkup(buttons)
 
     def main_menu_keyboard(self, user: User) -> InlineKeyboardMarkup:
         """Menú principal - Diseñado para máxima claridad"""
@@ -250,15 +401,9 @@ user_keyboards = UserKeyboards()
 admin_keyboards = AdminKeyboards()
 
 # Funciones de compatibilidad con el código existente
-def main_menu():
-    """Función de compatibilidad"""
-    class DummyUser:
-        def __init__(self):
-            self.level = 1
-            self.besitos = 100
-
-    dummy_user = DummyUser()
-    return user_keyboards.main_menu_keyboard(dummy_user)
+def main_menu(user: User):
+    """Función de compatibilidad - requiere usuario"""
+    return user_keyboards.get_main_menu_by_role(user)
 
 def back_to_main():
     """Función de compatibilidad"""
@@ -286,9 +431,9 @@ def profile_menu():
     ]])
 
 # Aliases y utilidades para compatibilidad con código antiguo
-def get_main_menu():
+def get_main_menu(user: User):
     """Alias para obtener el menú principal"""
-    return main_menu()
+    return main_menu(user)
 
 def get_mission_keyboard(missions: List[Any]) -> InlineKeyboardMarkup:
     """Genera un teclado para seleccionar misiones"""
