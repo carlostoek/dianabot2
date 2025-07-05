@@ -5,6 +5,7 @@ from models.channel_management import (
     ChannelMembership,
     EntryToken,
     ChannelSettings,
+    TokenTariff,
 )
 from models.user import User
 from datetime import datetime, timedelta
@@ -19,6 +20,24 @@ class ChannelService:
             await session.commit()
             await session.refresh(channel)
             return channel
+
+    async def create_tariff(self, name: str, duration_days: int, cost: int) -> TokenTariff:
+        async for session in get_db():
+            tariff = TokenTariff(name=name, duration_days=duration_days, cost=cost)
+            session.add(tariff)
+            await session.commit()
+            await session.refresh(tariff)
+            return tariff
+
+    async def get_tariffs(self):
+        async for session in get_db():
+            result = await session.execute(select(TokenTariff))
+            return result.scalars().all()
+
+    async def get_tariff(self, tariff_id: int) -> TokenTariff | None:
+        async for session in get_db():
+            result = await session.execute(select(TokenTariff).where(TokenTariff.id == tariff_id))
+            return result.scalar_one_or_none()
 
     async def create_entry_token(
         self,
@@ -44,15 +63,25 @@ class ChannelService:
             await session.refresh(token)
             return token
 
-    async def validate_token(self, telegram_id: int, token_str: str) -> bool:
+    async def create_token_from_tariff(self, channel_id: int, tariff_id: int, is_vip: bool = False) -> EntryToken | None:
+        tariff = await self.get_tariff(tariff_id)
+        if not tariff:
+            return None
+        return await self.create_entry_token(
+            channel_id=channel_id,
+            is_vip=is_vip,
+            days_valid=tariff.duration_days,
+        )
+
+    async def validate_token(self, telegram_id: int, token_str: str) -> str | None:
         async for session in get_db():
             result = await session.execute(select(EntryToken).where(EntryToken.token == token_str))
             token = result.scalar_one_or_none()
             if not token:
-                return False
+                return None
 
             if token.used_count >= token.max_uses or token.expires_at < datetime.utcnow():
-                return False
+                return None
 
             token.used_count += 1
             await session.commit()
@@ -60,7 +89,7 @@ class ChannelService:
             user_result = await session.execute(select(User).where(User.telegram_id == telegram_id))
             user = user_result.scalar_one_or_none()
             if not user:
-                return False
+                return None
 
             membership = ChannelMembership(
                 user_id=user.id,
@@ -76,7 +105,9 @@ class ChannelService:
             )
             session.add(membership)
             await session.commit()
-            return True
+            channel_res = await session.execute(select(Channel).where(Channel.id == token.channel_id))
+            channel = channel_res.scalar_one_or_none()
+            return channel.invite_link if channel else None
 
     async def expire_memberships(self, bot):
         async for session in get_db():

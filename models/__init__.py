@@ -8,4 +8,5 @@ from .channel_management import (
     ChannelMembership,
     EntryToken,
     ChannelSettings,
+    TokenTariff,
 )

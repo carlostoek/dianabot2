@@ -214,12 +214,36 @@ class AdminKeyboards:
 
     def back_to_admin_keyboard(self) -> InlineKeyboardMarkup:
         """Botón para volver al menú admin"""
-        return InlineKeyboardMarkup([[
-            InlineKeyboardButton(
-                f"{self.EMOJIS['back']} Panel Admin",
-                callback_data="admin_menu"
-            )
-        ]])
+        return InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(
+                    f"{self.EMOJIS['back']} Panel Admin",
+                    callback_data="admin_menu",
+                )
+            ]
+        ])
+
+    def tokens_menu(self) -> InlineKeyboardMarkup:
+        buttons = [
+            [InlineKeyboardButton("⚙️ Configurar Tarifas", callback_data="token_tariffs")],
+            [InlineKeyboardButton("🔗 Generar Token", callback_data="token_generate")],
+            [InlineKeyboardButton(f"{self.EMOJIS['back']} Volver", callback_data="admin_menu")],
+        ]
+        return InlineKeyboardMarkup(buttons)
+
+    def tariff_duration_keyboard(self) -> InlineKeyboardMarkup:
+        buttons = [
+            [InlineKeyboardButton("1 día", callback_data="tariff_days_1"), InlineKeyboardButton("7 días", callback_data="tariff_days_7")],
+            [InlineKeyboardButton("15 días", callback_data="tariff_days_15"), InlineKeyboardButton("30 días", callback_data="tariff_days_30")],
+        ]
+        return InlineKeyboardMarkup(buttons)
+
+    def tariffs_list_keyboard(self, tariffs) -> InlineKeyboardMarkup:
+        rows = []
+        for t in tariffs:
+            rows.append([InlineKeyboardButton(t.name, callback_data=f"gen_tariff_{t.id}")])
+        rows.append([InlineKeyboardButton(f"{self.EMOJIS['back']} Volver", callback_data="admin_tokens")])
+        return InlineKeyboardMarkup(rows)
 
 # Instancias globales para compatibilidad
 user_keyboards = UserKeyboards()
