@@ -6,6 +6,7 @@ from models.vip import VIPToken
 from datetime import datetime, timedelta
 import random
 import string
+from models.core import User
 
 class AdminService:
     async def create_mission(self, title, description, reward_besitos):
@@ -30,3 +31,20 @@ class AdminService:
             session.add(new_token)
             await session.commit()
             return token_str
+    async def get_basic_stats(self):
+        async for session in get_db():
+            from sqlalchemy import func
+            user_count = await session.scalar(select(func.count(User.id)))
+            token_count = await session.scalar(select(func.count(VIPToken.id)))
+            return {"users": user_count or 0, "vip_tokens": token_count or 0}
+
+    async def broadcast(self, bot, text: str):
+        async for session in get_db():
+            result = await session.execute(select(User.telegram_id))
+            user_ids = [row[0] for row in result.all()]
+        for uid in user_ids:
+            try:
+                await bot.send_message(uid, text)
+            except Exception:
+                pass
+
