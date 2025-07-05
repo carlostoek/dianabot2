@@ -9,6 +9,7 @@ from services.user_service import UserService
 from utils.keyboards import admin_keyboards, user_keyboards
 from utils.formatters import MessageFormatter
 from models.user import User, UserRole
+from sqlalchemy import func
 import logging
 
 logger = logging.getLogger(__name__)
@@ -38,10 +39,10 @@ class AdminHandlers:
                 return
 
             text = (
-                f"🔧 **Panel de Administración DianaBot**\n\n"
+                f"🔧 *Panel de Administración DianaBot*\n\n"
                 f"Bienvenida al sistema de gestión completo.\n"
                 f"Desde aquí puedes controlar todos los aspectos del bot.\n\n"
-                f"**Funciones disponibles:**\n"
+                f"*Funciones disponibles:*\n"
                 f"👥 Gestión de usuarios y roles\n"
                 f"📢 Administración de canales\n"
                 f"🎫 Tokens de entrada VIP\n"
@@ -108,7 +109,7 @@ class AdminHandlers:
     async def _show_admin_menu(query):
         """Muestra el menú principal de admin"""
         text = (
-            f"🔧 **Panel de Administración**\n\n"
+            f"🔧 *Panel de Administración*\n\n"
             f"Sistema operativo y funcional.\n"
             f"Todas las funciones están disponibles.\n\n"
             f"*Selecciona una opción:*"
@@ -136,13 +137,13 @@ class AdminHandlers:
             )
 
             text = (
-                f"👥 **Gestión de Usuarios**\n\n"
-                f"📊 **Estadísticas generales:**\n"
-                f"• Total de usuarios: **{total_users}**\n"
-                f"• Usuarios activos: **{active_users}**\n"
-                f"• Usuarios VIP: **{vip_users}** 💎\n"
-                f"• Administradores: **{admin_users}** 👑\n\n"
-                f"👤 **Usuarios recientes:**\n"
+                f"👥 *Gestión de Usuarios*\n\n"
+                f"📊 *Estadísticas generales:*\n"
+                f"• Total de usuarios: *{total_users}*\n"
+                f"• Usuarios activos: *{active_users}*\n"
+                f"• Usuarios VIP: *{vip_users}* 💎\n"
+                f"• Administradores: *{admin_users}* 👑\n\n"
+                f"👤 *Usuarios recientes:*\n"
             )
 
             for user in recent_users:
@@ -168,8 +169,8 @@ class AdminHandlers:
     async def _show_channels_management(query):
         """Muestra gestión de canales"""
         text = (
-            f"📢 **Gestión de Canales**\n\n"
-            f"🚧 **Próximamente disponible:**\n"
+            f"📢 *Gestión de Canales*\n\n"
+            f"🚧 *Próximamente disponible:*\n"
             f"• Registrar canales VIP y gratuitos\n"
             f"• Configurar delays de entrada\n"
             f"• Gestionar auto-expulsiones\n"
@@ -188,8 +189,8 @@ class AdminHandlers:
     async def _show_tokens_management(query):
         """Muestra gestión de tokens"""
         text = (
-            f"🎫 **Gestión de Tokens de Entrada**\n\n"
-            f"🚧 **Próximamente disponible:**\n"
+            f"🎫 *Gestión de Tokens de Entrada*\n\n"
+            f"🚧 *Próximamente disponible:*\n"
             f"• Generar tokens VIP personalizados\n"
             f"• Configurar duración de tokens\n"
             f"• Ver tokens activos/expirados\n"
@@ -215,26 +216,24 @@ class AdminHandlers:
             # Estadísticas básicas
             total_users = db.query(User).count()
             total_games = db.query(GameSession).count()
-            total_besitos = (
-                db.query(User).with_entities(db.func.sum(User.besitos)).scalar() or 0
-            )
+            total_besitos = db.query(func.sum(User.besitos)).scalar() or 0
 
             # Estadísticas por rol
             vip_count = db.query(User).filter(User.role == UserRole.VIP).count()
             free_count = db.query(User).filter(User.role == UserRole.FREE).count()
 
             text = (
-                f"📊 **Estadísticas del Sistema**\n\n"
-                f"👥 **Usuarios:**\n"
-                f"• Total registrados: **{total_users}**\n"
-                f"• Usuarios VIP: **{vip_count}** 💎\n"
-                f"• Usuarios gratuitos: **{free_count}** 🆓\n\n"
-                f"🎮 **Actividad:**\n"
-                f"• Partidas jugadas: **{total_games}**\n\n"
-                f"💋 **Economía:**\n"
-                f"• Besitos en circulación: **{total_besitos:,}**\n"
-                f"• Promedio por usuario: **{total_besitos//max(total_users,1):,}**\n\n"
-                f"🔄 *Actualizado en tiempo real*"
+                f"📊 *Estadísticas del Sistema*\n\n"
+                f"👥 *Usuarios:*\n"
+                f"• Total registrados: *{total_users}*\n"
+                f"• Usuarios VIP: *{vip_count}*\n"
+                f"• Usuarios gratuitos: *{free_count}*\n\n"
+                f"🎮 *Actividad:*\n"
+                f"• Partidas jugadas: *{total_games}*\n\n"
+                f"💋 *Economía:*\n"
+                f"• Besitos en circulación: *{total_besitos:,}*\n"
+                f"• Promedio por usuario: *{total_besitos // max(total_users, 1):,}*\n\n"
+                f"🔄 _Actualizado en tiempo real_"
             )
 
             keyboard = [
@@ -253,8 +252,8 @@ class AdminHandlers:
     async def _show_broadcast_menu(query):
         """Muestra menú de envío masivo"""
         text = (
-            f"📤 **Envío Masivo de Mensajes**\n\n"
-            f"🚧 **Próximamente disponible:**\n"
+            f"📤 *Envío Masivo de Mensajes*\n\n"
+            f"🚧 *Próximamente disponible:*\n"
             f"• Enviar a todos los usuarios\n"
             f"• Enviar solo a usuarios VIP\n"
             f"• Enviar a canales específicos\n"
@@ -274,8 +273,8 @@ class AdminHandlers:
     async def _show_config_menu(query):
         """Muestra menú de configuración"""
         text = (
-            f"⚙️ **Configuración del Sistema**\n\n"
-            f"🚧 **Próximamente disponible:**\n"
+            f"⚙️ *Configuración del Sistema*\n\n"
+            f"🚧 *Próximamente disponible:*\n"
             f"• Configurar multiplicadores VIP\n"
             f"• Ajustar recompensas de misiones\n"
             f"• Configurar delays de canales\n"
