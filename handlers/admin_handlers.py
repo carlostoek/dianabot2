@@ -1,5 +1,5 @@
 """
-Handlers para administración del bot - VERSIÓN CORREGIDA
+Handlers para administración del bot - VERSIÓN CORREGIDA FINAL
 """
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -165,42 +165,42 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_channels_management(query):
-        """Muestra gestión de canales"""
+        """Muestra gestión de canales - SIN MARKDOWN"""
         text = (
-            "📢 **Gestión de Canales**\n\n"
-            "🚧 **Próximamente disponible:**\n"
+            "📢 Gestión de Canales\n\n"
+            "🚧 Próximamente disponible:\n"
             "• Registrar canales VIP y gratuitos\n"
             "• Configurar delays de entrada\n"
             "• Gestionar auto-expulsiones\n"
             "• Ver miembros por canal\n"
             "• Configurar mensajes promocionales\n\n"
-            "*Esta será la función principal para monetización.*"
+            "Esta será la función principal para monetización."
         )
 
         await query.edit_message_text(
             text,
-            reply_markup=admin_keyboards.back_to_admin_keyboard(),
-            parse_mode="Markdown",
+            reply_markup=admin_keyboards.back_to_admin_keyboard()
+            # ✅ SIN parse_mode
         )
 
     @staticmethod
     async def _show_tokens_management(query):
-        """Muestra gestión de tokens"""
+        """Muestra gestión de tokens - SIN MARKDOWN"""
         text = (
-            "🎫 **Gestión de Tokens de Entrada**\n\n"
-            "🚧 **Próximamente disponible:**\n"
+            "🎫 Gestión de Tokens de Entrada\n\n"
+            "🚧 Próximamente disponible:\n"
             "• Generar tokens VIP personalizados\n"
             "• Configurar duración de tokens\n"
             "• Ver tokens activos/expirados\n"
             "• Revocar tokens específicos\n"
             "• Estadísticas de uso\n\n"
-            "*Sistema de monetización directa.*"
+            "Sistema de monetización directa."
         )
 
         await query.edit_message_text(
             text,
-            reply_markup=admin_keyboards.back_to_admin_keyboard(),
-            parse_mode="Markdown",
+            reply_markup=admin_keyboards.back_to_admin_keyboard()
+            # ✅ SIN parse_mode
         )
 
     @staticmethod
@@ -248,44 +248,44 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_broadcast_menu(query):
-        """Muestra menú de envío masivo"""
+        """Muestra menú de envío masivo - SIN MARKDOWN"""
         text = (
-            "📤 **Envío Masivo de Mensajes**\n\n"
-            "🚧 **Próximamente disponible:**\n"
+            "📤 Envío Masivo de Mensajes\n\n"
+            "🚧 Próximamente disponible:\n"
             "• Enviar a todos los usuarios\n"
             "• Enviar solo a usuarios VIP\n"
             "• Enviar a canales específicos\n"
             "• Programar mensajes\n"
             "• Adjuntar botones con recompensas\n"
             "• Preview antes de enviar\n\n"
-            "*Herramienta poderosa para comunicación.*"
+            "Herramienta poderosa para comunicación."
         )
 
         await query.edit_message_text(
             text,
-            reply_markup=admin_keyboards.back_to_admin_keyboard(),
-            parse_mode="Markdown",
+            reply_markup=admin_keyboards.back_to_admin_keyboard()
+            # ✅ SIN parse_mode
         )
 
     @staticmethod
     async def _show_config_menu(query):
-        """Muestra menú de configuración"""
+        """Muestra menú de configuración - SIN MARKDOWN"""
         text = (
-            "⚙️ **Configuración del Sistema**\n\n"
-            "🚧 **Próximamente disponible:**\n"
+            "⚙️ Configuración del Sistema\n\n"
+            "🚧 Próximamente disponible:\n"
             "• Configurar multiplicadores VIP\n"
             "• Ajustar recompensas de misiones\n"
             "• Configurar delays de canales\n"
             "• Gestionar precios de tienda\n"
             "• Personalizar mensajes del bot\n"
             "• Configurar auto-expulsiones\n\n"
-            "*Control total del comportamiento del bot.*"
+            "Control total del comportamiento del bot."
         )
 
         await query.edit_message_text(
             text,
-            reply_markup=admin_keyboards.back_to_admin_keyboard(),
-            parse_mode="Markdown",
+            reply_markup=admin_keyboards.back_to_admin_keyboard()
+            # ✅ SIN parse_mode
         )
 
     @staticmethod
@@ -304,4 +304,4 @@ class AdminHandlers:
                 )
         finally:
             db.close()
-        
+            
