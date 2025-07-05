@@ -106,6 +106,9 @@ class BaseHandlers:
 
             user_data = update.effective_user
 
+            # Importar aquí para evitar referencias antes de la asignación
+            from handlers.admin_handlers import AdminHandlers
+
             # ✅ LOGGING DETALLADO
             logger.info(
                 f"🔘 CALLBACK RECIBIDO: '{query.data}' de usuario {user_data.id}"
@@ -153,9 +156,6 @@ class BaseHandlers:
                         await query.edit_message_text("❌ No tienes permisos de administrador.")
                         return
 
-                    # Importar AdminHandlers aquí para evitar imports circulares
-                    from handlers.admin_handlers import AdminHandlers
-
                     if query.data == "admin_users":
                         await AdminHandlers._show_users_management(query)
                     elif query.data == "admin_stats":
@@ -201,7 +201,4 @@ class BaseHandlers:
                 await query.edit_message_text("❌ Error procesando botón.")
             except:  # pragma: no cover - si falla el edit, no hacer nada
                 pass
-
-# Import al final para evitar importaciones circulares
-from handlers.admin_handlers import AdminHandlers
 
