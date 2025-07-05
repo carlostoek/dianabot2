@@ -188,6 +188,10 @@ class BaseHandlers:
                         reply_markup=user_keyboards.back_to_main_keyboard(),
                         parse_mode='Markdown'
                     )
+                    elif query.data == "switch_to_user_view":
+    logger.info("🔄 Procesando switch_to_user_view")
+    from handlers.admin_handlers import AdminHandlers
+    await AdminHandlers._switch_to_user_view(query)
 
             finally:
                 db.close()
