@@ -69,6 +69,10 @@ class AdminHandlers:
                 await AdminHandlers._show_admin_menu(query)
             elif query.data == "admin_users":
                 await AdminHandlers._show_users_management(query)
+            elif query.data == "admin_channels":
+                await AdminHandlers._show_channels_management(query)
+            elif query.data == "admin_tokens":
+                await AdminHandlers._show_tokens_management(query)
             elif query.data == "admin_stats":
                 await AdminHandlers._show_stats(query)
             else:
@@ -123,6 +127,52 @@ class AdminHandlers:
                 parse_mode='Markdown'
             )
             
+        finally:
+            db.close()
+
+    @staticmethod
+    async def _show_channels_management(query):
+        """Gestión de canales"""
+        db = get_db_session()
+        try:
+            from models.channel_management import Channel
+            total_channels = db.query(Channel).count()
+
+            text = (
+                f"📢 **Gestión de Canales**\n\n"
+                f"• Canales registrados: **{total_channels}**\n\n"
+                f"🚧 *Funciones avanzadas en desarrollo*"
+            )
+
+            await query.edit_message_text(
+                text,
+                reply_markup=admin_keyboards.back_to_admin_keyboard(),
+                parse_mode='Markdown',
+            )
+
+        finally:
+            db.close()
+
+    @staticmethod
+    async def _show_tokens_management(query):
+        """Gestión de tokens"""
+        db = get_db_session()
+        try:
+            from models.channel_management import EntryToken
+            total_tokens = db.query(EntryToken).count()
+
+            text = (
+                f"🎫 **Gestión de Tokens**\n\n"
+                f"• Tokens generados: **{total_tokens}**\n\n"
+                f"🚧 *Funciones avanzadas en desarrollo*"
+            )
+
+            await query.edit_message_text(
+                text,
+                reply_markup=admin_keyboards.back_to_admin_keyboard(),
+                parse_mode='Markdown',
+            )
+
         finally:
             db.close()
     
