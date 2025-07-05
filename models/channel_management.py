@@ -41,3 +41,11 @@ class ChannelSettings(BaseModel):
     channel_id = Column(Integer, ForeignKey("channels.id"), unique=True, nullable=False)
     join_delay_seconds = Column(Integer, default=0)
     promo_message = Column(String, nullable=True)
+
+
+class TokenTariff(BaseModel):
+    __tablename__ = "token_tariffs"
+
+    name = Column(String, unique=True, nullable=False)
+    duration_days = Column(Integer, nullable=False)
+    cost = Column(Integer, nullable=False)

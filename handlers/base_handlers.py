@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 from core.database import get_db_session
 from services.user_service import UserService
 from services.mission_tracker import MissionTracker
+from services.channel_service import ChannelService
 from utils.keyboards import main_menu, back_to_main
 from utils.formatters import MessageFormatter
 import logging
@@ -19,6 +20,7 @@ class BaseHandlers:
             logger.info(f"📨 Comando /start recibido de {update.effective_user.id}")
             
             user_data = update.effective_user
+            token_param = context.args[0] if context.args else None
             
             # Usar sesión directa
             db = get_db_session()
@@ -36,9 +38,15 @@ class BaseHandlers:
                     first_name=user_data.first_name
                 )
                 
+                if token_param:
+                    link = await ChannelService().validate_token(user_data.id, token_param)
+                    if link:
+                        await update.message.reply_text("✅ Token válido. Procesando acceso...")
+                        await update.message.reply_text(link)
+
                 # Mensaje de bienvenida
                 welcome_text = MessageFormatter.welcome_message(user, is_new_user)
-                
+
                 await update.message.reply_text(
                     welcome_text,
                     reply_markup=main_menu(),

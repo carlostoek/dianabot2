@@ -1,4 +1,4 @@
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from .config import Config
 from .database import init_db
 import logging
@@ -44,6 +44,7 @@ class DianaBot:
             self.application.add_handler(CallbackQueryHandler(BaseHandlers.button_handler))
             self.application.add_handler(CallbackQueryHandler(MissionHandlers.mission_handler, pattern="^(missions|mission_)") )
             self.application.add_handler(CallbackQueryHandler(AdminHandlers.admin_handler, pattern="^admin_"))
+            self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, AdminHandlers.admin_text_handler))
             
             logger.info("✅ Handlers configurados correctamente")
             

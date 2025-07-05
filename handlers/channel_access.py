@@ -16,9 +16,10 @@ async def start_join(message: types.Message, state: FSMContext):
 async def process_token(message: types.Message, state: FSMContext):
     token = message.text.strip()
     user_id = message.from_user.id
-    success = await channel_service.validate_token(user_id, token)
-    if success:
+    link = await channel_service.validate_token(user_id, token)
+    if link:
         await message.answer("✅ Token válido. Procesando acceso...")
+        await message.answer(link)
     else:
         await message.answer("❌ Token inválido o expirado.")
     await state.clear()

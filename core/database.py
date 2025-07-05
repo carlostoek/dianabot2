@@ -41,7 +41,7 @@ def init_db():
     print(
         "📊 Tablas creadas: users, missions, user_missions, game_sessions, "
         "game_leaderboards, channels, channel_memberships, entry_tokens, "
-        "channel_settings"
+        "channel_settings, token_tariffs"
     )
 
 def reset_db():
