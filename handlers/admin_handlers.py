@@ -39,17 +39,17 @@ class AdminHandlers:
                 return
 
             text = (
-                f"🔧 *Panel de Administración DianaBot*\n\n"
-                f"Bienvenida al sistema de gestión completo.\n"
-                f"Desde aquí puedes controlar todos los aspectos del bot.\n\n"
-                f"*Funciones disponibles:*\n"
-                f"👥 Gestión de usuarios y roles\n"
-                f"📢 Administración de canales\n"
-                f"🎫 Tokens de entrada VIP\n"
-                f"📊 Estadísticas en tiempo real\n"
-                f"📤 Envío masivo de mensajes\n"
-                f"⚙️ Configuración del sistema\n\n"
-                f"*Selecciona una opción para continuar:*"
+                "🔧 **Panel de Administración DianaBot**\n\n"
+                "Bienvenida al sistema de gestión completo.\n"
+                "Desde aquí puedes controlar todos los aspectos del bot.\n\n"
+                "**Funciones disponibles:**\n"
+                "👥 Gestión de usuarios y roles\n"
+                "📢 Administración de canales\n"
+                "🎫 Tokens de entrada VIP\n"
+                "📊 Estadísticas en tiempo real\n"
+                "📤 Envío masivo de mensajes\n"
+                "⚙️ Configuración del sistema\n\n"
+                "*Selecciona una opción para continuar:*"
             )
 
             await update.message.reply_text(
@@ -94,9 +94,9 @@ class AdminHandlers:
                 await AdminHandlers._switch_to_user_view(query)
             else:
                 await query.edit_message_text(
-                    f"🚧 **Función en desarrollo**\n\n"
+                    "🚧 **Función en desarrollo**\n\n"
                     f"La función '{query.data}' estará disponible pronto.\n\n"
-                    f"*Mientras tanto, puedes usar las otras opciones.*",
+                    "*Mientras tanto, puedes usar las otras opciones.*",
                     reply_markup=admin_keyboards.back_to_admin_keyboard(),
                     parse_mode="Markdown",
                 )
@@ -109,10 +109,10 @@ class AdminHandlers:
     async def _show_admin_menu(query):
         """Muestra el menú principal de admin"""
         text = (
-            f"🔧 *Panel de Administración*\n\n"
-            f"Sistema operativo y funcional.\n"
-            f"Todas las funciones están disponibles.\n\n"
-            f"*Selecciona una opción:*"
+            "🔧 **Panel de Administración**\n\n"
+            "Sistema operativo y funcional.\n"
+            "Todas las funciones están disponibles.\n\n"
+            "*Selecciona una opción:*"
         )
 
         await query.edit_message_text(
@@ -137,21 +137,19 @@ class AdminHandlers:
             )
 
             text = (
-                f"👥 *Gestión de Usuarios*\n\n"
-                f"📊 *Estadísticas generales:*\n"
-                f"• Total de usuarios: *{total_users}*\n"
-                f"• Usuarios activos: *{active_users}*\n"
-                f"• Usuarios VIP: *{vip_users}* 💎\n"
-                f"• Administradores: *{admin_users}* 👑\n\n"
-                f"👤 *Usuarios recientes:*\n"
+                "👥 **Gestión de Usuarios**\n\n"
+                "📊 **Estadísticas generales:**\n"
+                f"• Total de usuarios: **{total_users}**\n"
+                f"• Usuarios activos: **{active_users}**\n"
+                f"• Usuarios VIP: **{vip_users}** 💎\n"
+                f"• Administradores: **{admin_users}** 👑\n\n"
+                "👤 **Usuarios recientes:**\n"
             )
 
             for user in recent_users:
-                text += (
-                    f"• {user.role_emoji} {user.display_name} (Nivel {user.level})\n"
-                )
+                text += f"• {user.role_emoji} {user.display_name} (Nivel {user.level})\n"
 
-            text += f"\n🔧 *Funciones avanzadas de gestión en desarrollo*"
+            text += "\n🔧 *Funciones avanzadas de gestión en desarrollo*"
 
             keyboard = [
                 [InlineKeyboardButton("🔄 Actualizar", callback_data="admin_users")],
@@ -167,16 +165,16 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_channels_management(query):
-        """Muestra gestión de canales - CORREGIDO"""
+        """Muestra gestión de canales"""
         text = (
-            f"📢 **Gestión de Canales**\n\n"
-            f"🚧 **Próximamente disponible:**\n"
-            f"• Registrar canales VIP y gratuitos\n"
-            f"• Configurar delays de entrada\n"
-            f"• Gestionar auto-expulsiones\n"
-            f"• Ver miembros por canal\n"
-            f"• Configurar mensajes promocionales\n\n"
-            f"*Esta será la función principal para monetización.*"
+            "📢 **Gestión de Canales**\n\n"
+            "🚧 **Próximamente disponible:**\n"
+            "• Registrar canales VIP y gratuitos\n"
+            "• Configurar delays de entrada\n"
+            "• Gestionar auto-expulsiones\n"
+            "• Ver miembros por canal\n"
+            "• Configurar mensajes promocionales\n\n"
+            "*Esta será la función principal para monetización.*"
         )
 
         await query.edit_message_text(
@@ -187,16 +185,16 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_tokens_management(query):
-        """Muestra gestión de tokens - CORREGIDO"""
+        """Muestra gestión de tokens"""
         text = (
-            f"🎫 **Gestión de Tokens de Entrada**\n\n"
-            f"🚧 **Próximamente disponible:**\n"
-            f"• Generar tokens VIP personalizados\n"
-            f"• Configurar duración de tokens\n"
-            f"• Ver tokens activos/expirados\n"
-            f"• Revocar tokens específicos\n"
-            f"• Estadísticas de uso\n\n"
-            f"*Sistema de monetización directa.*"
+            "🎫 **Gestión de Tokens de Entrada**\n\n"
+            "🚧 **Próximamente disponible:**\n"
+            "• Generar tokens VIP personalizados\n"
+            "• Configurar duración de tokens\n"
+            "• Ver tokens activos/expirados\n"
+            "• Revocar tokens específicos\n"
+            "• Estadísticas de uso\n\n"
+            "*Sistema de monetización directa.*"
         )
 
         await query.edit_message_text(
@@ -207,7 +205,7 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_stats(query):
-        """Muestra estadísticas del sistema - CORREGIDO"""
+        """Muestra estadísticas del sistema"""
         db = get_db_session()
 
         try:
@@ -223,17 +221,17 @@ class AdminHandlers:
             free_count = db.query(User).filter(User.role == UserRole.FREE).count()
 
             text = (
-                f"📊 **Estadísticas del Sistema**\n\n"
-                f"👥 **Usuarios:**\n"
+                "📊 **Estadísticas del Sistema**\n\n"
+                "👥 **Usuarios:**\n"
                 f"• Total registrados: **{total_users}**\n"
                 f"• Usuarios VIP: **{vip_count}** 💎\n"
                 f"• Usuarios gratuitos: **{free_count}** 🆓\n\n"
-                f"🎮 **Actividad:**\n"
+                "🎮 **Actividad:**\n"
                 f"• Partidas jugadas: **{total_games}**\n\n"
-                f"💋 **Economía:**\n"
+                "💋 **Economía:**\n"
                 f"• Besitos en circulación: **{total_besitos:,}**\n"
                 f"• Promedio por usuario: **{total_besitos//max(total_users,1):,}**\n\n"
-                f"🔄 *Actualizado en tiempo real*"
+                "🔄 *Actualizado en tiempo real*"
             )
 
             keyboard = [
@@ -250,17 +248,17 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_broadcast_menu(query):
-        """Muestra menú de envío masivo - CORREGIDO"""
+        """Muestra menú de envío masivo"""
         text = (
-            f"📤 **Envío Masivo de Mensajes**\n\n"
-            f"🚧 **Próximamente disponible:**\n"
-            f"• Enviar a todos los usuarios\n"
-            f"• Enviar solo a usuarios VIP\n"
-            f"• Enviar a canales específicos\n"
-            f"• Programar mensajes\n"
-            f"• Adjuntar botones con recompensas\n"
-            f"• Preview antes de enviar\n\n"
-            f"*Herramienta poderosa para comunicación.*"
+            "📤 **Envío Masivo de Mensajes**\n\n"
+            "🚧 **Próximamente disponible:**\n"
+            "• Enviar a todos los usuarios\n"
+            "• Enviar solo a usuarios VIP\n"
+            "• Enviar a canales específicos\n"
+            "• Programar mensajes\n"
+            "• Adjuntar botones con recompensas\n"
+            "• Preview antes de enviar\n\n"
+            "*Herramienta poderosa para comunicación.*"
         )
 
         await query.edit_message_text(
@@ -271,17 +269,17 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_config_menu(query):
-        """Muestra menú de configuración - CORREGIDO"""
+        """Muestra menú de configuración"""
         text = (
-            f"⚙️ **Configuración del Sistema**\n\n"
-            f"🚧 **Próximamente disponible:**\n"
-            f"• Configurar multiplicadores VIP\n"
-            f"• Ajustar recompensas de misiones\n"
-            f"• Configurar delays de canales\n"
-            f"• Gestionar precios de tienda\n"
-            f"• Personalizar mensajes del bot\n"
-            f"• Configurar auto-expulsiones\n\n"
-            f"*Control total del comportamiento del bot.*"
+            "⚙️ **Configuración del Sistema**\n\n"
+            "🚧 **Próximamente disponible:**\n"
+            "• Configurar multiplicadores VIP\n"
+            "• Ajustar recompensas de misiones\n"
+            "• Configurar delays de canales\n"
+            "• Gestionar precios de tienda\n"
+            "• Personalizar mensajes del bot\n"
+            "• Configurar auto-expulsiones\n\n"
+            "*Control total del comportamiento del bot.*"
         )
 
         await query.edit_message_text(
@@ -306,3 +304,4 @@ class AdminHandlers:
                 )
         finally:
             db.close()
+        
