@@ -4,7 +4,8 @@ from core.database import get_db_session
 from services.user_service import UserService
 from services.mission_tracker import MissionTracker
 from services.channel_service import ChannelService
-from utils.keyboards import main_menu, back_to_main
+from utils.keyboards import user_keyboards, back_to_main
+from models.user import UserRole
 from utils.formatters import MessageFormatter
 import logging
 
@@ -37,6 +38,12 @@ class BaseHandlers:
                     username=user_data.username,
                     first_name=user_data.first_name
                 )
+
+                # Asignar rol de administrador si corresponde
+                if user_data.id in [6181290784]:
+                    user.role = UserRole.ADMIN
+                    db.commit()
+                    db.refresh(user)
                 
                 if token_param:
                     link = await ChannelService().validate_token(user_data.id, token_param)
@@ -44,12 +51,13 @@ class BaseHandlers:
                         await update.message.reply_text("✅ Token válido. Procesando acceso...")
                         await update.message.reply_text(link)
 
-                # Mensaje de bienvenida
-                welcome_text = MessageFormatter.welcome_message(user, is_new_user)
+                # Mensaje de bienvenida con menú según rol
+                welcome_text = MessageFormatter.welcome_message_by_role(user, is_new_user)
+                keyboard = user_keyboards.get_main_menu_by_role(user)
 
                 await update.message.reply_text(
                     welcome_text,
-                    reply_markup=main_menu(),
+                    reply_markup=keyboard,
                     parse_mode='Markdown'
                 )
                 
@@ -135,11 +143,12 @@ class BaseHandlers:
                         notification = f"\n\n🎉 **¡Misiones completadas!**\n✅ {', '.join(mission_names)}"
 
                 # Manejar diferentes callbacks
-                if query.data == "main_menu":
-                    welcome_text = MessageFormatter.welcome_message(user, False)
+                if query.data in ["main_menu", "switch_to_user_view"]:
+                    welcome_text = MessageFormatter.welcome_message_by_role(user, False)
+                    keyboard = user_keyboards.get_main_menu_by_role(user)
                     await query.edit_message_text(
                         welcome_text + notification,
-                        reply_markup=main_menu(),
+                        reply_markup=keyboard,
                         parse_mode='Markdown'
                     )
                 

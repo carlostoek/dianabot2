@@ -27,6 +27,66 @@ class MessageFormatter:
                 f"📖 Historia: {user.current_story}\n\n"
                 f"*¿En qué puedo asistirte hoy?*"
             )
+
+    @staticmethod
+    def welcome_message_by_role(user, is_new_user=False):
+        """Mensaje de bienvenida según el rol del usuario"""
+
+        if user.is_admin:
+            return MessageFormatter._admin_welcome(user, is_new_user)
+        elif user.is_vip:
+            return MessageFormatter._vip_welcome(user, is_new_user)
+        else:
+            return MessageFormatter._free_welcome(user, is_new_user)
+
+    @staticmethod
+    def _admin_welcome(user, is_new_user):
+        return (
+            "👑 **Panel de Administración**\n\n"
+            f"Bienvenida, **{user.display_name}**.\n"
+            "Sistema DianaBot operativo y listo.\n\n"
+            "**Estado del sistema:**\n"
+            f"⭐ Tu nivel: **{user.level}**\n"
+            f"💋 Besitos: **{user.besitos}**\n\n"
+            "*Selecciona una función administrativa:*"
+        )
+
+    @staticmethod
+    def _vip_welcome(user, is_new_user):
+        multiplier_text = (
+            f" (x{user.besitos_multiplier})" if user.besitos_multiplier > 1.0 else ""
+        )
+        return (
+            "💎 **¡Bienvenida de vuelta, VIP!**\n\n"
+            f"Hola **{user.display_name}**, tu acceso premium está activo.\n\n"
+            "**Tu estado VIP:**\n"
+            f"⭐ Nivel: **{user.level}**\n"
+            f"💋 Besitos: **{user.besitos}**{multiplier_text}\n"
+            "👑 Membresía: **VIP Activa**\n\n"
+            "*Accede a tu contenido exclusivo:*"
+        )
+
+    @staticmethod
+    def _free_welcome(user, is_new_user):
+        if is_new_user:
+            return (
+                f"🎩 **¡Bienvenido a la mansión, {user.display_name}!**\n\n"
+                "Soy Lucien, mayordomo de Lady Diana 👑. "
+                "Ella ha expresado interés en conocerte.\n\n"
+                "**Tu estado inicial:**\n"
+                f"⭐ Nivel: **{user.level}**\n"
+                f"💋 Besitos: **{user.besitos}**\n\n"
+                "💎 *¿Te interesa el acceso VIP para contenido exclusivo?*"
+            )
+        else:
+            return (
+                f"🎩 **¡Bienvenido de vuelta, {user.display_name}!**\n\n"
+                "**Tu progreso actual:**\n"
+                f"⭐ Nivel: **{user.level}**\n"
+                f"💋 Besitos: **{user.besitos}**\n"
+                f"📖 Historia: *{user.current_story}*\n\n"
+                "💎 *¡Descubre los beneficios VIP!*"
+            )
     
     @staticmethod
     def user_profile(user):
