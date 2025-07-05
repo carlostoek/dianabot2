@@ -10,12 +10,13 @@ from utils.keyboards import admin_keyboards, user_keyboards
 from utils.formatters import MessageFormatter
 from models.user import User, UserRole
 from sqlalchemy import func  # Import necesario para funciones agregadas
+from config import ADMINS
 import logging
 
 logger = logging.getLogger(__name__)
 
 # IDs de administradores autorizados
-ADMIN_IDS = [6181290784]  # Tu Telegram ID
+ADMIN_IDS = ADMINS
 
 
 class AdminHandlers:

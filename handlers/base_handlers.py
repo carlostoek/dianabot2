@@ -6,6 +6,7 @@ from services.channel_service import ChannelService
 from utils.keyboards import user_keyboards, admin_keyboards, back_to_main
 from models.user import UserRole
 from utils.formatters import MessageFormatter
+from config import ADMINS
 import logging
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class BaseHandlers:
                 )
 
                 # Asignar rol de administrador si corresponde
-                if user_data.id in [6181290784]:
+                if user_data.id in ADMINS:
                     user.role = UserRole.ADMIN
                     db.commit()
                     db.refresh(user)
