@@ -290,17 +290,29 @@ class AdminHandlers:
 
     @staticmethod
     async def _switch_to_user_view(query):
-        """Cambia a vista de usuario"""
+        """Cambia a vista de usuario - VERSIÓN SIMPLE"""
         db = get_db_session()
 
         try:
             user = UserService.get_user_by_telegram_id(db, query.from_user.id)
             if user:
-                welcome_text = MessageFormatter.welcome_message_by_role(user, False)
+                # Mensaje simple sin Markdown problemático
+                text = (
+                    f"🏠 Vista de Usuario\n\n"
+                    f"Hola {user.display_name}!\n"
+                    f"Nivel: {user.level}\n"
+                    f"Besitos: {user.besitos}\n"
+                    f"Rol: {user.role.value}\n\n"
+                    f"Selecciona una opción:"
+                )
+
                 keyboard = user_keyboards.get_main_menu_by_role(user)
 
+                await query.edit_message_text(text, reply_markup=keyboard)
+            else:
                 await query.edit_message_text(
-                    welcome_text, reply_markup=keyboard, parse_mode="Markdown"
+                    "❌ Usuario no encontrado. Usa /start",
+                    reply_markup=user_keyboards.back_to_main_keyboard(),
                 )
         finally:
             db.close()
