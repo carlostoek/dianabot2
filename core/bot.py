@@ -40,12 +40,17 @@ class DianaBot:
             # Import handlers
             from handlers.base_handlers import BaseHandlers
             from handlers.admin_handlers import AdminHandlers
-            from handlers.channel_handlers import ChannelHandlers  # ← AÑADIR
+            from handlers.channel_handlers import ChannelHandlers
+            from services.admin_commands import AdminCommands  # ← AÑADIR
 
             # Comandos básicos
             self.application.add_handler(CommandHandler("start", BaseHandlers.start))
             self.application.add_handler(CommandHandler("help", BaseHandlers.help_command))
             self.application.add_handler(CommandHandler("admin", AdminHandlers.admin_command))
+
+            # ✅ COMANDOS DE ADMINISTRADOR
+            self.application.add_handler(CommandHandler("register_channel", AdminCommands.register_channel_command))
+            self.application.add_handler(CommandHandler("list_channels", AdminCommands.list_channels_command))
 
 
             # ✅ UN SOLO HANDLER PARA TODOS LOS CALLBACKS
@@ -55,7 +60,7 @@ class DianaBot:
             self.application.add_handler(
                 CallbackQueryHandler(
                     ChannelHandlers.channel_management_handler,
-                    pattern="^(admin_channels|channel_|register_|create_tariff_|tariff_duration_|set_price_|generate_token_)"
+                    pattern="^(channel_|admin_channels|register_|tariff_|set_price_|generate_token_|show_tariffs_|members_|config_).*$"
                 )
             )
 
