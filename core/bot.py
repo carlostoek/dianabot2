@@ -51,6 +51,7 @@ class DianaBot:
             # ✅ COMANDOS DE ADMINISTRADOR
             self.application.add_handler(CommandHandler("register_channel", AdminCommands.register_channel_command))
             self.application.add_handler(CommandHandler("list_channels", AdminCommands.list_channels_command))
+            self.application.add_handler(CommandHandler("test_register", AdminCommands.test_register_command))
 
 
             # ✅ UN SOLO HANDLER PARA TODOS LOS CALLBACKS
