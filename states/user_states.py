@@ -6,3 +6,6 @@ class UserOnboarding(StatesGroup):
 
 class ViewingBackpack(StatesGroup):
     viewing = State()
+
+class ChannelJoin(StatesGroup):
+    awaiting_token = State()
