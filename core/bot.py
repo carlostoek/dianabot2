@@ -52,10 +52,12 @@ class DianaBot:
             self.application.add_handler(CallbackQueryHandler(BaseHandlers.button_handler))
 
             # ✅ AÑADIR HANDLER ESPECÍFICO PARA CANALES
-            self.application.add_handler(CallbackQueryHandler(
-                ChannelHandlers.channel_management_handler,
-                pattern="^(channel_|admin_channels)$"
-            ))
+            self.application.add_handler(
+                CallbackQueryHandler(
+                    ChannelHandlers.channel_management_handler,
+                    pattern="^(admin_channels|channel_|register_|create_tariff_|tariff_duration_|set_price_|generate_token_)"
+                )
+            )
 
             logger.info("✅ Handlers configurados correctamente")
 
