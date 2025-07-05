@@ -154,6 +154,12 @@ class UserKeyboards:
         ]
         return InlineKeyboardMarkup(buttons)
 
+    def get_main_menu_by_role(self, user: User) -> InlineKeyboardMarkup:
+        """Obtiene el menú principal según el rol"""
+        if user.is_admin:
+            return admin_keyboards.admin_main_menu()
+        return self.main_menu_keyboard(user)
+
 class AdminKeyboards:
     """Teclados para administradores"""
 
