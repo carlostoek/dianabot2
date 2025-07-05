@@ -45,11 +45,23 @@ class BaseHandlers:
                     db.commit()
                     db.refresh(user)
                 
-                if token_param:
-                    link = await ChannelService().validate_token(user_data.id, token_param)
-                    if link:
-                        await update.message.reply_text("✅ Token válido. Procesando acceso...")
-                        await update.message.reply_text(link)
+                if token_param and token_param.startswith("vip_token_"):
+                    vip_token_str = token_param.replace("vip_token_", "")
+                    vip_channel_id = await VIPService.validate_vip_token(db, user.id, vip_token_str)
+                    if vip_channel_id:
+                        await update.message.reply_text(
+                            "✅ ¡Token VIP válido! Se te ha concedido acceso al canal VIP.\n\n"
+                            "Pronto recibirás una invitación para unirte al canal.",
+                            parse_mode="Markdown"
+                        )
+                        # Here you would typically send the actual invite link or add the user
+                        # For now, just a placeholder message.
+                        # await context.bot.send_message(chat_id=user_data.id, text=f"Aquí está tu enlace de invitación: https://t.me/c/{abs(vip_channel_id)}")
+                    else:
+                        await update.message.reply_text(
+                            "❌ El token VIP no es válido o ya ha sido utilizado.",
+                            parse_mode="Markdown"
+                        )
 
                 # Mensaje de bienvenida con menú según rol
                 welcome_text = MessageFormatter.welcome_message_by_role(user, is_new_user)

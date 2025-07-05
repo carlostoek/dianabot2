@@ -12,6 +12,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from core.bot import DianaBot
 from core.config import Config
+from jobs.scheduler import setup_scheduler
 
 # Configurar logging básico
 logging.basicConfig(
@@ -40,6 +41,8 @@ def main():
         
         # Crear y ejecutar bot
         bot = DianaBot()
+        scheduler = setup_scheduler()
+        scheduler.start()
         bot.run()
         
     except KeyboardInterrupt:

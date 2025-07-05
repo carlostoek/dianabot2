@@ -1,4 +1,3 @@
-
 from aiogram.fsm.state import StatesGroup, State
 
 class AdminMenu(StatesGroup):
@@ -9,3 +8,12 @@ class EditingConfigurations(StatesGroup):
 
 class ManagingUsers(StatesGroup):
     managing = State()
+
+class VipTariff(StatesGroup):
+    waiting_for_name = State()
+    waiting_for_duration = State()
+    waiting_for_cost = State()
+
+class VipToken(StatesGroup):
+    waiting_for_tariff_selection = State()
+    waiting_for_channel_id = State()

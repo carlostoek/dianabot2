@@ -34,7 +34,7 @@ def init_db():
     """Inicializa todas las tablas"""
     # Importar todos los modelos para registrarlos
     from models import user, mission, game_session
-    from models import channel
+    from models import channel, vip
     
     Base.metadata.create_all(bind=engine)
     print("✅ Base de datos inicializada correctamente")
