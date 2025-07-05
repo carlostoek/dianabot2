@@ -4,8 +4,17 @@ from telegram import (
     ReplyKeyboardMarkup,
     KeyboardButton,
 )
-from models.user import User
 from typing import List, Optional, Dict, Any
+
+# AÑADIR IMPORTS FALTANTES
+try:
+    from models.user import User
+except ImportError:  # pragma: no cover - fallback para importación
+    class User:  # type: ignore
+        def __init__(self):
+            self.level = 1
+            self.besitos = 100
+            self.role = None
 
 class UserKeyboards:
     """Teclados diferenciados por rol de usuario"""

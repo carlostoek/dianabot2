@@ -33,46 +33,21 @@ class DianaBot:
             raise
 
     def setup_handlers(self):
-        """Configura handlers básicos"""
+        """Configura handlers básicos - VERSIÓN SIMPLIFICADA"""
         logger.info("🔧 Configurando handlers...")
 
         try:
-            # Import handlers básicos
+            # Import handlers
             from handlers.base_handlers import BaseHandlers
-            from handlers.mission_handlers import MissionHandlers
-            from handlers.admin_handlers import AdminHandlers  # Nuevo import
+            from handlers.admin_handlers import AdminHandlers
 
             # Comandos básicos
             self.application.add_handler(CommandHandler("start", BaseHandlers.start))
-            self.application.add_handler(
-                CommandHandler("help", BaseHandlers.help_command)
-            )
-            self.application.add_handler(
-                CommandHandler("admin", AdminHandlers.admin_command)
-            )  # Comando admin
+            self.application.add_handler(CommandHandler("help", BaseHandlers.help_command))
+            self.application.add_handler(CommandHandler("admin", AdminHandlers.admin_command))
 
-            # Callback queries básicos
-            self.application.add_handler(
-                CallbackQueryHandler(
-                    BaseHandlers.button_handler,
-                    pattern="^(main_menu|profile|games|story|help)$",
-                )
-            )
-
-            # Callback queries de misiones
-            self.application.add_handler(
-                CallbackQueryHandler(
-                    MissionHandlers.mission_handler, pattern="^(missions|mission_)"
-                )
-            )
-
-            # Callback queries de administración
-            self.application.add_handler(
-                CallbackQueryHandler(
-                    AdminHandlers.admin_handler,
-                    pattern="^(admin_|switch_to_user_view)$",
-                )
-            )
+            # ✅ UN SOLO HANDLER PARA TODOS LOS CALLBACKS
+            self.application.add_handler(CallbackQueryHandler(BaseHandlers.button_handler))
 
             logger.info("✅ Handlers configurados correctamente")
 

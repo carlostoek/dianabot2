@@ -2,9 +2,8 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from core.database import get_db_session
 from services.user_service import UserService
-from services.mission_tracker import MissionTracker
 from services.channel_service import ChannelService
-from utils.keyboards import user_keyboards, back_to_main
+from utils.keyboards import user_keyboards, admin_keyboards, back_to_main
 from models.user import UserRole
 from utils.formatters import MessageFormatter
 import logging
@@ -100,99 +99,109 @@ class BaseHandlers:
     
     @staticmethod
     async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handler para botones inline"""
+        """Handler básico para botones CON DIAGNÓSTICO"""
         try:
             query = update.callback_query
             await query.answer()
-            
+
             user_data = update.effective_user
-            logger.info(f"🔘 Botón presionado: {query.data} por usuario {user_data.id}")
-            
-            # Usar sesión directa
+
+            # ✅ LOGGING DETALLADO
+            logger.info(
+                f"🔘 CALLBACK RECIBIDO: '{query.data}' de usuario {user_data.id}"
+            )
+
             db = get_db_session()
-            
+
             try:
                 user = UserService.get_user_by_telegram_id(db, user_data.id)
 
                 if not user:
-                    await query.edit_message_text(
-                        "❌ Usuario no encontrado. Use /start para registrarse.",
-                        reply_markup=back_to_main()
-                    )
+                    logger.warning(f"❌ Usuario {user_data.id} no encontrado en BD")
+                    await query.edit_message_text("❌ Usuario no encontrado. Use /start")
                     return
 
-                notification = ""
+                logger.info(
+                    f"👤 Usuario encontrado: {user.display_name} (Rol: {user.role.value})"
+                )
 
-                # TRACKING DE MISIONES
-                session_data = MissionTracker.get_user_session_data(db, user)
-
-                if query.data in ["missions", "games", "profile", "story"]:
-                    if "sections_visited" not in session_data:
-                        session_data["sections_visited"] = []
-
-                    if query.data not in session_data["sections_visited"]:
-                        session_data["sections_visited"].append(query.data)
-
-                    completed_missions = MissionTracker.track_action(
-                        db, user, "menu_visit",
-                        {"sections_visited": session_data["sections_visited"]}
-                    )
-
-                    if completed_missions:
-                        mission_names = [m["name"] for m in completed_missions]
-                        notification = f"\n\n🎉 **¡Misiones completadas!**\n✅ {', '.join(mission_names)}"
-
-                # Manejar diferentes callbacks
-                if query.data in ["main_menu", "switch_to_user_view"]:
+                # ✅ MANEJAR TODOS LOS CALLBACKS AQUÍ TEMPORALMENTE
+                if query.data == "main_menu":
+                    logger.info("🏠 Procesando main_menu")
                     welcome_text = MessageFormatter.welcome_message_by_role(user, False)
                     keyboard = user_keyboards.get_main_menu_by_role(user)
                     await query.edit_message_text(
-                        welcome_text + notification,
+                        welcome_text,
                         reply_markup=keyboard,
                         parse_mode='Markdown'
                     )
-                
+
                 elif query.data == "profile":
+                    logger.info("👤 Procesando profile")
                     profile_text = MessageFormatter.user_profile(user)
                     await query.edit_message_text(
                         profile_text,
-                        reply_markup=back_to_main(),
+                        reply_markup=user_keyboards.back_to_main_keyboard(),
                         parse_mode='Markdown'
                     )
-                
-                elif query.data == "missions":
-                    from handlers.mission_handlers import MissionHandlers
-                    await MissionHandlers._show_mission_menu(query, db, user)
-                elif query.data in ["games", "story"]:
+
+                # ✅ CALLBACKS DE ADMIN - MANEJAR AQUÍ TEMPORALMENTE
+                elif query.data.startswith("admin_"):
+                    logger.info(f"🔧 Procesando callback admin: {query.data}")
+
+                    if not AdminHandlers.is_admin(user_data.id):
+                        await query.edit_message_text("❌ No tienes permisos de administrador.")
+                        return
+
+                    # Importar AdminHandlers aquí para evitar imports circulares
+                    from handlers.admin_handlers import AdminHandlers
+
+                    if query.data == "admin_users":
+                        await AdminHandlers._show_users_management(query)
+                    elif query.data == "admin_stats":
+                        await AdminHandlers._show_stats(query)
+                    elif query.data == "admin_menu":
+                        await AdminHandlers._show_admin_menu(query)
+                    else:
+                        await query.edit_message_text(
+                            f"🚧 **Función en desarrollo**\n\n"
+                            f"'{query.data}' estará disponible pronto.",
+                            reply_markup=admin_keyboards.back_to_admin_keyboard(),
+                            parse_mode='Markdown'
+                        )
+
+                elif query.data in ["missions", "games", "story"]:
+                    logger.info(f"🎮 Procesando: {query.data}")
                     await query.edit_message_text(
                         f"🎩 **{query.data.title()}**\n\n"
                         f"Esta función estará disponible muy pronto.\n\n"
                         f"*Gracias por su paciencia.*",
-                        reply_markup=back_to_main(),
+                        reply_markup=user_keyboards.back_to_main_keyboard(),
                         parse_mode='Markdown'
                     )
-                
+
                 else:
+                    logger.warning(f"❓ Callback no reconocido: {query.data}")
                     await query.edit_message_text(
-                        "❓ Opción no reconocida.",
-                        reply_markup=back_to_main()
+                        f"❓ Opción no reconocida: `{query.data}`\n\n"
+                        f"*Regresando al menú principal...*",
+                        reply_markup=user_keyboards.back_to_main_keyboard(),
+                        parse_mode='Markdown'
                     )
-                    
-            except Exception as e:
-                logger.error(f"❌ Error en base de datos del button_handler: {e}")
-                await query.edit_message_text(
-                    "❌ Error procesando solicitud.",
-                    reply_markup=back_to_main()
-                )
+
             finally:
                 db.close()
-                
+
         except Exception as e:
-            logger.error(f"❌ Error en button_handler: {e}")
+            logger.error(f"❌ ERROR en button_handler: {e}")
+            logger.error(
+                f"❌ Callback data: {query.data if 'query' in locals() else 'N/A'}"
+            )
             try:
-                await query.edit_message_text(
-                    "❌ Error procesando botón.",
-                    reply_markup=back_to_main()
-                )
-            except:
-                pass  # Si falla el edit, no hacer nada más
+                await query.edit_message_text("❌ Error procesando botón.")
+            except:  # pragma: no cover - si falla el edit, no hacer nada
+                pass
+
+# Import al final para evitar importaciones circulares
+from handlers.admin_handlers import AdminHandlers
+
