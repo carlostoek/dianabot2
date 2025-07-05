@@ -165,23 +165,12 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_channels_management(query):
-        """Muestra gestión de canales - SIN MARKDOWN"""
-        text = (
-            "📢 Gestión de Canales\n\n"
-            "🚧 Próximamente disponible:\n"
-            "• Registrar canales VIP y gratuitos\n"
-            "• Configurar delays de entrada\n"
-            "• Gestionar auto-expulsiones\n"
-            "• Ver miembros por canal\n"
-            "• Configurar mensajes promocionales\n\n"
-            "Esta será la función principal para monetización."
-        )
+        """Muestra gestión de canales - AHORA FUNCIONAL"""
+        # Importar el nuevo handler
+        from handlers.channel_handlers import ChannelHandlers
 
-        await query.edit_message_text(
-            text,
-            reply_markup=admin_keyboards.back_to_admin_keyboard()
-            # ✅ SIN parse_mode
-        )
+        # Redirigir al handler específico de canales
+        await ChannelHandlers._show_channel_menu(query)
 
     @staticmethod
     async def _show_tokens_management(query):

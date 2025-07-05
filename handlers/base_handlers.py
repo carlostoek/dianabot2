@@ -158,8 +158,6 @@ class BaseHandlers:
                 
                     if query.data == "admin_users":
                         await AdminHandlers._show_users_management(query)
-                    elif query.data == "admin_channels":  # ← AÑADIR
-                        await AdminHandlers._show_channels_management(query)
                     elif query.data == "admin_tokens":  # ← AÑADIR
                         await AdminHandlers._show_tokens_management(query)
                     elif query.data == "admin_stats":
@@ -180,6 +178,10 @@ class BaseHandlers:
                             # ✅ SIN parse_mode para evitar errores
                         )
         
+                elif query.data == "admin_channels":
+                    logger.info("📢 Redirigiendo a gestión de canales")
+                    from handlers.channel_handlers import ChannelHandlers
+                    await ChannelHandlers.channel_management_handler(update, context)
                 elif query.data in ["missions", "games", "story"]:
                         logger.info(f"🎮 Procesando: {query.data}")
                         await query.edit_message_text(

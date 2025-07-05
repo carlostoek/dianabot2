@@ -40,14 +40,22 @@ class DianaBot:
             # Import handlers
             from handlers.base_handlers import BaseHandlers
             from handlers.admin_handlers import AdminHandlers
+            from handlers.channel_handlers import ChannelHandlers  # ← AÑADIR
 
             # Comandos básicos
             self.application.add_handler(CommandHandler("start", BaseHandlers.start))
             self.application.add_handler(CommandHandler("help", BaseHandlers.help_command))
             self.application.add_handler(CommandHandler("admin", AdminHandlers.admin_command))
 
+
             # ✅ UN SOLO HANDLER PARA TODOS LOS CALLBACKS
             self.application.add_handler(CallbackQueryHandler(BaseHandlers.button_handler))
+
+            # ✅ AÑADIR HANDLER ESPECÍFICO PARA CANALES
+            self.application.add_handler(CallbackQueryHandler(
+                ChannelHandlers.channel_management_handler,
+                pattern="^(channel_|admin_channels)$"
+            ))
 
             logger.info("✅ Handlers configurados correctamente")
 

@@ -64,12 +64,73 @@ class ChannelHandlers:
     # Métodos placeholder para futuras implementaciones
     @staticmethod
     async def _show_register_options(query):
-        await query.edit_message_text("🚧 Función en desarrollo", reply_markup=admin_keyboards.back_to_admin_keyboard())
+        """Muestra opciones para registrar canal"""
+        text = (
+            "➕ Registrar Nuevo Canal\n\n"
+            "Selecciona el tipo de canal:"
+        )
+
+        keyboard = [
+            [InlineKeyboardButton("💎 Canal VIP", callback_data="register_vip")],
+            [InlineKeyboardButton("🆓 Canal Gratuito", callback_data="register_free")],
+            [InlineKeyboardButton("◀️ Volver", callback_data="admin_channels")]
+        ]
+
+        await query.edit_message_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
 
     @staticmethod
     async def _show_channel_list(query):
-        await query.edit_message_text("🚧 Función en desarrollo", reply_markup=admin_keyboards.back_to_admin_keyboard())
+        """Muestra lista de canales registrados"""
+        db = get_db_session()
+
+        try:
+            channels = ChannelService.get_channels(db)
+
+            text = "📋 Canales Registrados\n\n"
+
+            if not channels:
+                text += "No hay canales registrados aún."
+            else:
+                for channel in channels:
+                    emoji = "💎" if channel.channel_type.value == "vip" else "🆓"
+                    status = "🟢" if channel.is_active else "🔴"
+                    text += f"{emoji} {status} {channel.channel_name}\n"
+                    text += f"   ID: {channel.channel_id}\n"
+                    text += f"   Tipo: {channel.channel_type.value.upper()}\n\n"
+
+            keyboard = [
+                [InlineKeyboardButton("➕ Registrar Canal", callback_data="channel_register")],
+                [InlineKeyboardButton("◀️ Volver", callback_data="admin_channels")]
+            ]
+
+            await query.edit_message_text(
+                text,
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+
+        finally:
+            db.close()
 
     @staticmethod
     async def _show_tariff_management(query):
-        await query.edit_message_text("🚧 Función en desarrollo", reply_markup=admin_keyboards.back_to_admin_keyboard())
+        """Muestra gestión de tarifas"""
+        text = (
+            "💰 Gestión de Tarifas\n\n"
+            "🚧 Próximamente disponible:\n"
+            "• Crear tarifas personalizadas\n"
+            "• Configurar precios y duración\n"
+            "• Gestionar tarifas existentes\n\n"
+            "Esta función estará lista en la siguiente fase."
+        )
+
+        keyboard = [
+            [InlineKeyboardButton("◀️ Volver", callback_data="admin_channels")]
+        ]
+
+        await query.edit_message_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
