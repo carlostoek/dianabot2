@@ -30,6 +30,8 @@ class ChannelHandlers:
                 await ChannelHandlers._start_vip_registration(query)
             elif query.data == "register_free":
                 await ChannelHandlers._start_free_registration(query)
+            elif query.data == "example_channels":
+                await ChannelHandlers._show_example_channels(query)
             elif query.data.startswith("channel_"):
                 channel_id = query.data.split("_")[1]
                 await ChannelHandlers._show_channel_details(query, int(channel_id))
@@ -45,6 +47,9 @@ class ChannelHandlers:
                 parts = query.data.split("_")
                 channel_id, days, price = int(parts[2]), int(parts[3]), int(parts[4])
                 await ChannelHandlers._create_tariff_final(query, channel_id, days, price)
+            elif query.data.startswith("show_tariffs_"):
+                channel_id = int(query.data.split("_")[2])
+                await ChannelHandlers._show_channel_tariffs_for_tokens(query, channel_id)
             elif query.data.startswith("generate_token_"):
                 tariff_id = int(query.data.split("_")[2])
                 await ChannelHandlers._generate_token(query, tariff_id)
@@ -138,24 +143,47 @@ class ChannelHandlers:
 
     @staticmethod
     async def _show_tariff_management(query):
-        """Muestra gestión de tarifas"""
-        text = (
-            "💰 Gestión de Tarifas\n\n"
-            "🚧 Próximamente disponible:\n"
-            "• Crear tarifas personalizadas\n"
-            "• Configurar precios y duración\n"
-            "• Gestionar tarifas existentes\n\n"
-            "Esta función estará lista en la siguiente fase."
-        )
+        """Muestra gestión de tarifas - MEJORADO"""
+        db = get_db_session()
 
-        keyboard = [
-            [InlineKeyboardButton("◀️ Volver", callback_data="admin_channels")]
-        ]
+        try:
+            # Obtener canales VIP
+            from models.channel import Channel, ChannelType
+            vip_channels = db.query(Channel).filter(
+                Channel.channel_type == ChannelType.VIP,
+                Channel.is_active == True
+            ).all()
 
-        await query.edit_message_text(
-            text,
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
+            if not vip_channels:
+                text = (
+                    "💰 Gestión de Tarifas\n\n"
+                    "❌ No hay canales VIP registrados.\n"
+                    "Registra un canal VIP primero para crear tarifas."
+                )
+                keyboard = [
+                    [InlineKeyboardButton("➕ Registrar Canal VIP", callback_data="register_vip")],
+                    [InlineKeyboardButton("◀️ Volver", callback_data="admin_channels")]
+                ]
+            else:
+                text = "💰 Gestión de Tarifas\n\nSelecciona un canal VIP:"
+
+                keyboard = []
+                for channel in vip_channels:
+                    tariffs_count = len(ChannelService.get_channel_tariffs(db, channel.id))
+                    keyboard.append([InlineKeyboardButton(
+                        f"💎 {channel.channel_name} ({tariffs_count} tarifas)",
+                        callback_data=f"channel_{channel.id}"
+                    )])
+
+                keyboard.append([InlineKeyboardButton("◀️ Volver", callback_data="admin_channels")])
+
+            await query.edit_message_text(
+                text,
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+
+        finally:
+            db.close()
 
     @staticmethod
     async def _start_vip_registration(query):
@@ -203,6 +231,33 @@ class ChannelHandlers:
         await query.edit_message_text(
             text,
             reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+    @staticmethod
+    async def _show_example_channels(query):
+        """Muestra ejemplos de configuración de canales"""
+        text = (
+            "📋 **Ejemplos de Configuración**\n\n"
+            "💎 **Canal VIP:**\n"
+            "`/register_channel vip -1001234567890 Canal VIP Diana`\n\n"
+            "🆓 **Canal Gratuito:**\n"
+            "`/register_channel free -1001234567891 Canal Gratuito Diana`\n\n"
+            "📝 **Cómo obtener el ID del canal:**\n"
+            "1. Añade @userinfobot al canal\n"
+            "2. El bot te dará el ID del canal\n"
+            "3. Usa ese ID en el comando\n\n"
+            "⚠️ **Importante:** El bot debe ser administrador del canal"
+        )
+
+        keyboard = [
+            [InlineKeyboardButton("📋 Listar Canales", callback_data="channel_list")],
+            [InlineKeyboardButton("◀️ Volver", callback_data="channel_register")]
+        ]
+
+        await query.edit_message_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown"
         )
 
     @staticmethod
@@ -334,6 +389,44 @@ class ChannelHandlers:
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown"
         )
+
+    @staticmethod
+    async def _show_channel_tariffs_for_tokens(query, channel_id):
+        """Muestra tarifas de un canal para generar tokens"""
+        db = get_db_session()
+
+        try:
+            tariffs = ChannelService.get_channel_tariffs(db, channel_id)
+
+            if not tariffs:
+                text = (
+                    "🎫 Generar Tokens\n\n"
+                    "❌ No hay tarifas configuradas para este canal.\n"
+                    "Crea una tarifa primero."
+                )
+                keyboard = [
+                    [InlineKeyboardButton("💰 Crear Tarifa", callback_data=f"create_tariff_{channel_id}")],
+                    [InlineKeyboardButton("◀️ Volver", callback_data=f"channel_{channel_id}")]
+                ]
+            else:
+                text = "🎫 Generar Token\n\nSelecciona una tarifa:"
+
+                keyboard = []
+                for tariff in tariffs:
+                    keyboard.append([InlineKeyboardButton(
+                        f"{tariff.name} - {tariff.price_besitos} besitos",
+                        callback_data=f"generate_token_{tariff.id}"
+                    )])
+
+                keyboard.append([InlineKeyboardButton("◀️ Volver", callback_data=f"channel_{channel_id}")])
+
+            await query.edit_message_text(
+                text,
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+
+        finally:
+            db.close()
 
     @staticmethod
     async def _generate_token(query, tariff_id):
