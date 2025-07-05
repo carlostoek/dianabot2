@@ -33,19 +33,17 @@ class DianaBot:
             # Import handlers básicos
             from handlers.base_handlers import BaseHandlers
             from handlers.mission_handlers import MissionHandlers
-            from handlers.admin import AdminHandlers
+            from handlers.admin_handlers import AdminHandlers
             
             # Comandos básicos
             self.application.add_handler(CommandHandler("start", BaseHandlers.start))
             self.application.add_handler(CommandHandler("help", BaseHandlers.help_command))
             self.application.add_handler(CommandHandler("admin", AdminHandlers.admin_command))
-            self.application.add_handler(CommandHandler("stats", AdminHandlers.stats_command))
-            self.application.add_handler(CommandHandler("broadcast", AdminHandlers.broadcast_command))
             
             # Callback queries básicos
             self.application.add_handler(CallbackQueryHandler(BaseHandlers.button_handler))
             self.application.add_handler(CallbackQueryHandler(MissionHandlers.mission_handler, pattern="^(missions|mission_)") )
-            self.application.add_handler(CallbackQueryHandler(AdminHandlers.admin_callback, pattern="^admin_"))
+            self.application.add_handler(CallbackQueryHandler(AdminHandlers.admin_handler, pattern="^admin_"))
             
             logger.info("✅ Handlers configurados correctamente")
             
