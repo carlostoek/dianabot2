@@ -149,40 +149,47 @@ class BaseHandlers:
                     )
 
                 # ✅ CALLBACKS DE ADMIN - MANEJAR AQUÍ TEMPORALMENTE
-                elif query.data.startswith("admin_"):
-                    logger.info(f"🔧 Procesando callback admin: {query.data}")
+                elif query.data.startswith("admin_") or query.data == "switch_to_user_view":
+    logger.info(f"🔧 Procesando callback admin: {query.data}")
 
-                    if not AdminHandlers.is_admin(user_data.id):
-                        await query.edit_message_text("❌ No tienes permisos de administrador.")
-                        return
+    if not AdminHandlers.is_admin(user_data.id):
+        await query.edit_message_text("❌ No tienes permisos de administrador.")
+        return
 
-                    if query.data == "admin_users":
-                        await AdminHandlers._show_users_management(query)
-                    elif query.data == "admin_stats":
-                        await AdminHandlers._show_stats(query)
-                    elif query.data == "admin_menu":
-                        await AdminHandlers._show_admin_menu(query)
-                    else:
-                        await query.edit_message_text(
-                            f"🚧 **Función en desarrollo**\n\n"
-                            f"'{query.data}' estará disponible pronto.",
-                            reply_markup=admin_keyboards.back_to_admin_keyboard(),
-                            parse_mode='Markdown'
-                        )
-                elif query.data == "switch_to_user_view":
-                   logger.info("🔄 Procesando switch_to_user_view")
-                   from handlers.admin_handlers import AdminHandlers
-                   await AdminHandlers._switch_to_user_view(query)
+    if query.data == "admin_users":
+        await AdminHandlers._show_users_management(query)
+    elif query.data == "admin_channels":  # ← AÑADIR
+        await AdminHandlers._show_channels_management(query)
+    elif query.data == "admin_tokens":  # ← AÑADIR
+        await AdminHandlers._show_tokens_management(query)
+    elif query.data == "admin_stats":
+        await AdminHandlers._show_stats(query)
+    elif query.data == "admin_broadcast":  # ← AÑADIR
+        await AdminHandlers._show_broadcast_menu(query)
+    elif query.data == "admin_config":  # ← AÑADIR
+        await AdminHandlers._show_config_menu(query)
+    elif query.data == "admin_menu":
+        await AdminHandlers._show_admin_menu(query)
+    elif query.data == "switch_to_user_view":  # ← MOVER AQUÍ
+        await AdminHandlers._switch_to_user_view(query)
+    else:
+        await query.edit_message_text(
+            "🚧 Función en desarrollo\n\n"
+            f"'{query.data}' estará disponible pronto.",
+            reply_markup=admin_keyboards.back_to_admin_keyboard()
+            # ✅ SIN parse_mode para evitar errores
+        )
+        
+elif query.data in ["missions", "games", "story"]:
+    logger.info(f"🎮 Procesando: {query.data}")
+    await query.edit_message_text(
+        f"🎩 **{query.data.title()}**\n\n"
+        f"Esta función estará disponible muy pronto.\n\n"
+        f"*Gracias por su paciencia.*",
+        reply_markup=user_keyboards.back_to_main_keyboard(),
+        parse_mode='Markdown'
+    )
 
-                elif query.data in ["missions", "games", "story"]:
-                    logger.info(f"🎮 Procesando: {query.data}")
-                    await query.edit_message_text(
-                        f"🎩 **{query.data.title()}**\n\n"
-                        f"Esta función estará disponible muy pronto.\n\n"
-                        f"*Gracias por su paciencia.*",
-                        reply_markup=user_keyboards.back_to_main_keyboard(),
-                        parse_mode='Markdown'
-                    )
 
                 else:
                     logger.warning(f"❓ Callback no reconocido: {query.data}")
