@@ -3,10 +3,10 @@
 from .user import User
 from .mission import Mission
 from .game_session import GameSession
-from .channel_management import (
+from .channel import (
     Channel,
-    ChannelMembership,
+    ChannelTariff,
     EntryToken,
-    ChannelSettings,
-    TokenTariff,
+    ChannelMembership,
+    ChannelType,
 )
