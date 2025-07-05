@@ -1,12 +1,18 @@
-
-from aiogram import types
+from functools import wraps
+from telegram import Update
+from telegram.ext import ContextTypes
 from config import ADMINS
 from utils.validators import is_admin
 
+
 def admin_only(handler):
-    async def wrapper(message: types.Message, *args, **kwargs):
-        if not is_admin(message.from_user.id, ADMINS):
-            await message.answer("🚫 No tienes permisos para acceder a esta función.")
+    @wraps(handler)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        user = update.effective_user
+        message = update.effective_message
+        if user is None or not is_admin(user.id, ADMINS):
+            if message:
+                await message.reply_text("\ud83d\uddb1 No tienes permisos para acceder a esta funci\u00f3n.")
             return
-        return await handler(message, *args, **kwargs)
+        return await handler(update, context, *args, **kwargs)
     return wrapper

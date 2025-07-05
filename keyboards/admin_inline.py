@@ -1,10 +1,10 @@
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 def get_admin_menu():
     keyboard = [
-        [InlineKeyboardButton(text="🗂️ Gestionar Misiones", callback_data="manage_missions")],
-        [InlineKeyboardButton(text="🔑 Gestionar Tokens VIP", callback_data="manage_tokens")],
-        [InlineKeyboardButton(text="🛠️ Configuraciones Generales", callback_data="edit_config")],
+        [InlineKeyboardButton(text="\ud83d\udcca Estad\u00edsticas", callback_data="admin_stats")],
+        [InlineKeyboardButton(text="\ud83c\udf7e Generar Token VIP", callback_data="admin_generate_token")],
+        [InlineKeyboardButton(text="\ud83d\xdce3 Broadcast", callback_data="admin_broadcast")],
     ]
-    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+    return InlineKeyboardMarkup(keyboard)

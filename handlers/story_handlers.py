@@ -94,4 +94,21 @@ class StoryHandlers:
                 # Crear teclado con opciones
                 keyboard = []
                 for choice in scene_data["choices"]:
-                    # Verificar requisitos
+                    # Verificar requisitos (simplificado)
+                    keyboard.append([
+                        InlineKeyboardButton(choice.get("text", "Continuar"),
+                                             callback_data="main_menu")
+                    ])
+
+                await query.edit_message_text(
+                    scene_data.get("text", "..."),
+                    reply_markup=InlineKeyboardMarkup(keyboard),
+                    parse_mode="Markdown",
+                )
+
+            finally:
+                db.close()
+
+        except Exception as e:
+            logger.error(f"Error en chapter_handler: {e}")
+            await query.edit_message_text("❌ Error al cargar capítulo.")

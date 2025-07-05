@@ -303,4 +303,9 @@ class ProgressionService:
                     "username": user.display_name,
                     "level": user.level,
                     "besitos": user.besitos,
-                    "telegram_id": user.telegram_id
+                    "telegram_id": user.telegram_id,
+                })
+            return leaderboard
+        except Exception as e:
+            logger.error(f"Error obteniendo leaderboard: {e}")
+            return []
