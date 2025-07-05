@@ -1,5 +1,5 @@
 """
-Handlers para administración del bot - VERSIÓN COMPLETA
+Handlers para administración del bot - VERSIÓN CORREGIDA
 """
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -9,7 +9,7 @@ from services.user_service import UserService
 from utils.keyboards import admin_keyboards, user_keyboards
 from utils.formatters import MessageFormatter
 from models.user import User, UserRole
-from sqlalchemy import func
+from sqlalchemy import func  # Import necesario para funciones agregadas
 import logging
 
 logger = logging.getLogger(__name__)
@@ -167,10 +167,10 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_channels_management(query):
-        """Muestra gestión de canales"""
+        """Muestra gestión de canales - CORREGIDO"""
         text = (
-            f"📢 *Gestión de Canales*\n\n"
-            f"🚧 *Próximamente disponible:*\n"
+            f"📢 **Gestión de Canales**\n\n"
+            f"🚧 **Próximamente disponible:**\n"
             f"• Registrar canales VIP y gratuitos\n"
             f"• Configurar delays de entrada\n"
             f"• Gestionar auto-expulsiones\n"
@@ -187,10 +187,10 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_tokens_management(query):
-        """Muestra gestión de tokens"""
+        """Muestra gestión de tokens - CORREGIDO"""
         text = (
-            f"🎫 *Gestión de Tokens de Entrada*\n\n"
-            f"🚧 *Próximamente disponible:*\n"
+            f"🎫 **Gestión de Tokens de Entrada**\n\n"
+            f"🚧 **Próximamente disponible:**\n"
             f"• Generar tokens VIP personalizados\n"
             f"• Configurar duración de tokens\n"
             f"• Ver tokens activos/expirados\n"
@@ -207,7 +207,7 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_stats(query):
-        """Muestra estadísticas del sistema"""
+        """Muestra estadísticas del sistema - CORREGIDO"""
         db = get_db_session()
 
         try:
@@ -223,17 +223,17 @@ class AdminHandlers:
             free_count = db.query(User).filter(User.role == UserRole.FREE).count()
 
             text = (
-                f"📊 *Estadísticas del Sistema*\n\n"
-                f"👥 *Usuarios:*\n"
-                f"• Total registrados: *{total_users}*\n"
-                f"• Usuarios VIP: *{vip_count}*\n"
-                f"• Usuarios gratuitos: *{free_count}*\n\n"
-                f"🎮 *Actividad:*\n"
-                f"• Partidas jugadas: *{total_games}*\n\n"
-                f"💋 *Economía:*\n"
-                f"• Besitos en circulación: *{total_besitos:,}*\n"
-                f"• Promedio por usuario: *{total_besitos // max(total_users, 1):,}*\n\n"
-                f"🔄 _Actualizado en tiempo real_"
+                f"📊 **Estadísticas del Sistema**\n\n"
+                f"👥 **Usuarios:**\n"
+                f"• Total registrados: **{total_users}**\n"
+                f"• Usuarios VIP: **{vip_count}** 💎\n"
+                f"• Usuarios gratuitos: **{free_count}** 🆓\n\n"
+                f"🎮 **Actividad:**\n"
+                f"• Partidas jugadas: **{total_games}**\n\n"
+                f"💋 **Economía:**\n"
+                f"• Besitos en circulación: **{total_besitos:,}**\n"
+                f"• Promedio por usuario: **{total_besitos//max(total_users,1):,}**\n\n"
+                f"🔄 *Actualizado en tiempo real*"
             )
 
             keyboard = [
@@ -250,10 +250,10 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_broadcast_menu(query):
-        """Muestra menú de envío masivo"""
+        """Muestra menú de envío masivo - CORREGIDO"""
         text = (
-            f"📤 *Envío Masivo de Mensajes*\n\n"
-            f"🚧 *Próximamente disponible:*\n"
+            f"📤 **Envío Masivo de Mensajes**\n\n"
+            f"🚧 **Próximamente disponible:**\n"
             f"• Enviar a todos los usuarios\n"
             f"• Enviar solo a usuarios VIP\n"
             f"• Enviar a canales específicos\n"
@@ -271,10 +271,10 @@ class AdminHandlers:
 
     @staticmethod
     async def _show_config_menu(query):
-        """Muestra menú de configuración"""
+        """Muestra menú de configuración - CORREGIDO"""
         text = (
-            f"⚙️ *Configuración del Sistema*\n\n"
-            f"🚧 *Próximamente disponible:*\n"
+            f"⚙️ **Configuración del Sistema**\n\n"
+            f"🚧 **Próximamente disponible:**\n"
             f"• Configurar multiplicadores VIP\n"
             f"• Ajustar recompensas de misiones\n"
             f"• Configurar delays de canales\n"
