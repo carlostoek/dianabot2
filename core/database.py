@@ -34,10 +34,15 @@ def init_db():
     """Inicializa todas las tablas"""
     # Importar todos los modelos para registrarlos
     from models import user, mission, game_session
+    from models import channel_management
     
     Base.metadata.create_all(bind=engine)
     print("✅ Base de datos inicializada correctamente")
-    print("📊 Tablas creadas: users, missions, user_missions, game_sessions, game_leaderboards")
+    print(
+        "📊 Tablas creadas: users, missions, user_missions, game_sessions, "
+        "game_leaderboards, channels, channel_memberships, entry_tokens, "
+        "channel_settings"
+    )
 
 def reset_db():
     """Resetea la base de datos (solo para desarrollo)"""

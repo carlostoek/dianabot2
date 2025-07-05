@@ -1,17 +1,37 @@
 from sqlalchemy.future import select
 from database_init import get_db
-from models.channel import ChannelToken, ChannelAccess
-from models.core import User
+from models.channel_management import (
+    Channel,
+    ChannelMembership,
+    EntryToken,
+    ChannelSettings,
+)
+from models.user import User
 from datetime import datetime, timedelta
 import secrets
 
+
 class ChannelService:
-    async def create_token(self, channel_id: int, is_vip: bool, days_valid: int = 1,
-                          max_uses: int = 1, delay_seconds: int = 0) -> ChannelToken:
+    async def register_channel(self, name: str, invite_link: str = None, is_vip: bool = False) -> Channel:
+        async for session in get_db():
+            channel = Channel(name=name, invite_link=invite_link, is_vip=is_vip)
+            session.add(channel)
+            await session.commit()
+            await session.refresh(channel)
+            return channel
+
+    async def create_entry_token(
+        self,
+        channel_id: int,
+        is_vip: bool,
+        days_valid: int = 1,
+        max_uses: int = 1,
+        delay_seconds: int = 0,
+    ) -> EntryToken:
         token_str = secrets.token_urlsafe(8)
         expires_at = datetime.utcnow() + timedelta(days=days_valid)
         async for session in get_db():
-            new_token = ChannelToken(
+            token = EntryToken(
                 token=token_str,
                 channel_id=channel_id,
                 is_vip=is_vip,
@@ -19,16 +39,14 @@ class ChannelService:
                 expires_at=expires_at,
                 delay_seconds=delay_seconds,
             )
-            session.add(new_token)
+            session.add(token)
             await session.commit()
-            await session.refresh(new_token)
-            return new_token
+            await session.refresh(token)
+            return token
 
     async def validate_token(self, telegram_id: int, token_str: str) -> bool:
         async for session in get_db():
-            result = await session.execute(
-                select(ChannelToken).where(ChannelToken.token == token_str)
-            )
+            result = await session.execute(select(EntryToken).where(EntryToken.token == token_str))
             token = result.scalar_one_or_none()
             if not token:
                 return False
@@ -44,32 +62,36 @@ class ChannelService:
             if not user:
                 return False
 
-            access = ChannelAccess(
+            membership = ChannelMembership(
                 user_id=user.id,
                 channel_id=token.channel_id,
                 is_vip=token.is_vip,
                 is_pending=token.delay_seconds > 0,
-                pending_until=datetime.utcnow() + timedelta(seconds=token.delay_seconds) if token.delay_seconds > 0 else None,
-                access_expires=datetime.utcnow() + timedelta(days=30) if token.is_vip else None,
+                pending_until=(
+                    datetime.utcnow() + timedelta(seconds=token.delay_seconds)
+                    if token.delay_seconds > 0
+                    else None
+                ),
+                expires_at=datetime.utcnow() + timedelta(days=30) if token.is_vip else None,
             )
-            session.add(access)
+            session.add(membership)
             await session.commit()
             return True
 
-    async def expire_access(self, bot):
+    async def expire_memberships(self, bot):
         async for session in get_db():
             result = await session.execute(
-                select(ChannelAccess).where(
-                    ChannelAccess.is_active == True,
-                    ChannelAccess.access_expires != None,
-                    ChannelAccess.access_expires < datetime.utcnow()
+                select(ChannelMembership).where(
+                    ChannelMembership.is_active == True,
+                    ChannelMembership.expires_at != None,
+                    ChannelMembership.expires_at < datetime.utcnow(),
                 )
             )
             expired = result.scalars().all()
-            for access in expired:
-                access.is_active = False
+            for membership in expired:
+                membership.is_active = False
                 try:
-                    await bot.send_message(access.user_id, "🔒 Tu acceso ha expirado.")
+                    await bot.send_message(membership.user_id, "🔒 Tu acceso ha expirado.")
                 except Exception:
                     pass
             await session.commit()
@@ -77,17 +99,17 @@ class ChannelService:
     async def activate_pending(self, bot):
         async for session in get_db():
             result = await session.execute(
-                select(ChannelAccess).where(
-                    ChannelAccess.is_pending == True,
-                    ChannelAccess.pending_until != None,
-                    ChannelAccess.pending_until < datetime.utcnow()
+                select(ChannelMembership).where(
+                    ChannelMembership.is_pending == True,
+                    ChannelMembership.pending_until != None,
+                    ChannelMembership.pending_until < datetime.utcnow(),
                 )
             )
             pending = result.scalars().all()
-            for access in pending:
-                access.is_pending = False
+            for membership in pending:
+                membership.is_pending = False
                 try:
-                    await bot.send_message(access.user_id, "✅ Ahora tienes acceso al canal.")
+                    await bot.send_message(membership.user_id, "✅ Ahora tienes acceso al canal.")
                 except Exception:
                     pass
             await session.commit()
