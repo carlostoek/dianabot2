@@ -6,6 +6,6 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-ADMINS = [123456789]
+ADMINS = os.getenv("ADMIN_IDS")
 
 DATABASE_URL = "sqlite+aiosqlite:///./dianabot.db"
