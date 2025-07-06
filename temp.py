@@ -200,7 +200,7 @@ async def menu_handler(callback: CallbackQuery):
         await callback.message.edit_text(scene_text, reply_markup=Keyboards.narrative_menu(user_id))
     await callback.answer()
 
-    @dp.callback_query(Text(startswith="mission_"))
+@dp.callback_query(Text(startswith="mission_"))
 async def mission_detail(callback: CallbackQuery):
     user_id = callback.from_user.id
     mid = int(callback.data.split("_")[1])
@@ -267,7 +267,7 @@ async def games_menu_handler(callback: CallbackQuery, state: FSMContext):
         await callback.message.edit_text("🎡 Ruleta - Presiona girar para jugar.", reply_markup=Keyboards.roulette_menu())
     await callback.answer()
     
-    @dp.callback_query(Text(startswith="trivia_answer_"), TriviaStates.in_trivia)
+@dp.callback_query(Text(startswith="trivia_answer_"), TriviaStates.in_trivia)
 async def trivia_answer(callback: CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
     data = callback.data.split("_")
