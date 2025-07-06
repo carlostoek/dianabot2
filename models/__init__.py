@@ -11,3 +11,17 @@ from .channel import (
     ChannelType,
 )
 from .token import Token
+from .extra_models import (
+    TriviaUserAnswer,
+    ItemType,
+    Item,
+    InventoryItem,
+    Hint,
+    UserHint,
+    Combination,
+    UserCombination,
+    UserLevel,
+    UserDailyGift,
+    UserReferral,
+    Referral,
+)
