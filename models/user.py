@@ -28,6 +28,8 @@ class User(BaseModel):
     besitos_multiplier = Column(Float, default=1.0)
 
     # Relaciones (se definen después para evitar imports circulares)
+    narrative_state = relationship("NarrativeState", back_populates="user", uselist=False)
+    inventory_items = relationship("InventoryItem", back_populates="user")
     
     def __repr__(self):
         return (
