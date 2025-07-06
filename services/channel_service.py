@@ -15,22 +15,37 @@ class ChannelService:
     def register_channel(db: Session, channel_id: int, channel_name: str, channel_type: ChannelType) -> Channel:
         """Registra un nuevo canal"""
         try:
+            logger.info(f"Iniciando registro de canal: {channel_id}")
+            
             existing = db.query(Channel).filter(Channel.channel_id == channel_id).first()
             if existing:
-                raise ValueError(f"Canal {channel_id} ya está registrado")
-
+                raise ValueError(f"Canal {channel_id} ya está registrado como '{existing.channel_name}'")
+            
             channel = Channel(
                 channel_id=channel_id,
                 channel_name=channel_name,
                 channel_type=channel_type
             )
-
+            
+            logger.info(f"Canal creado en memoria: {channel_name}")
+            
             db.add(channel)
+            db.flush()  # FLUSH ANTES DE COMMIT
+            logger.info(f"Canal añadido a sesión BD")
+            
             db.commit()
+            logger.info(f"Canal commitado a BD")
+            
             db.refresh(channel)
-
-            logger.info(f"Canal registrado: {channel_name} ({channel_type.value})")
+            logger.info(f"Canal refrescado desde BD: ID={channel.id}")
+            
+            logger.info(f"Canal registrado exitosamente: {channel_name} ({channel_type.value})")
             return channel
+            
+        except Exception as e:
+            logger.error(f"Error registrando canal: {e}")
+            db.rollback()
+            raise
 
         except Exception as e:
             logger.error(f"Error registrando canal: {e}")

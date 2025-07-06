@@ -50,7 +50,8 @@ from states.admin_states import TokenConfig
             self.application.add_handler(CommandHandler("admin", AdminHandlers.admin_command))
 
             # ✅ COMANDOS DE ADMINISTRADOR
-            self.application.add_handler(CommandHandler("register_channel", AdminCommands.register_channel_command))
+        self.application.add_handler(CommandHandler("register_channel", AdminCommands.register_channel_command))
+        self.application.add_handler(CommandHandler("clear_channels", AdminCommands.clear_channels_command))  # Añadir este comando
             self.application.add_handler(CommandHandler("list_channels", AdminCommands.list_channels_command))
 
 
