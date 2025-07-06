@@ -152,37 +152,33 @@ class BaseHandlers:
                 # ✅ CALLBACKS DE ADMIN - MANEJAR AQUÍ TEMPORALMENTE
                 elif query.data.startswith("admin_") or query.data == "switch_to_user_view":
                     logger.info(f"🔧 Procesando callback admin: {query.data}")
-                
+
                     if not AdminHandlers.is_admin(user_data.id):
                         await query.edit_message_text("❌ No tienes permisos de administrador.")
                         return
-                
+
                     if query.data == "admin_users":
                         await AdminHandlers._show_users_management(query)
-                    elif query.data == "admin_tokens":  # ← AÑADIR
+                    elif query.data == "admin_channels":
+                        await AdminHandlers._show_channels_management(query)
+                    elif query.data == "admin_tokens":
                         await AdminHandlers._show_tokens_management(query)
                     elif query.data == "admin_stats":
                         await AdminHandlers._show_stats(query)
-                    elif query.data == "admin_broadcast":  # ← AÑADIR
+                    elif query.data == "admin_broadcast":
                         await AdminHandlers._show_broadcast_menu(query)
-                    elif query.data == "admin_config":  # ← AÑADIR
+                    elif query.data == "admin_config":
                         await AdminHandlers._show_config_menu(query)
                     elif query.data == "admin_menu":
                         await AdminHandlers._show_admin_menu(query)
-                    elif query.data == "switch_to_user_view":  # ← MOVER AQUÍ
+                    elif query.data == "switch_to_user_view":
                         await AdminHandlers._switch_to_user_view(query)
                     else:
                         await query.edit_message_text(
                             "🚧 Función en desarrollo\n\n"
                             f"'{query.data}' estará disponible pronto.",
                             reply_markup=admin_keyboards.back_to_admin_keyboard()
-                            # ✅ SIN parse_mode para evitar errores
                         )
-        
-                elif query.data == "admin_channels":
-                    logger.info("📢 Redirigiendo a gestión de canales")
-                    from handlers.channel_handlers import ChannelHandlers
-                    await ChannelHandlers.channel_management_handler(update, context)
                 elif query.data in ["missions", "games", "story"]:
                         logger.info(f"🎮 Procesando: {query.data}")
                         await query.edit_message_text(
